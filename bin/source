@@ -1,0 +1,14 @@
+int i=10e-0.5;
+i=i+1;
+
+/* test comment right */
+/* test comment error
+
+$ /* test illegal symbol */
+
+"test string";
+"test string error;
+
+while(num!=100 && num>=0){
+    num++;
+}

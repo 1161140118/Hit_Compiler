@@ -1,0 +1,36 @@
+_ ID
+_ UNINT
+_ UNFLOAT
+_ BOOL
+_ STRING
+for
+do
+while
+if
+else
+then
+int
+char
+float
+struct
++
+++
+*
+=
+&
+&&
+|
+||
+!
+==
+!=
+>
+>=
+<
+<=
+(
+)
+{
+}
+;
+
