@@ -6,8 +6,8 @@ i=i+1;
 
 $ /* test illegal symbol */
 
-"test string";
-"test string error;
+str1="test string";
+str2="test string error;
 
 while(num!=100 && num>=0){
     num++;

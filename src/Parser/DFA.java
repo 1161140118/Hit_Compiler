@@ -57,9 +57,6 @@ public interface DFA {
         return false;
     }
     
-    public static void main(String[] args) {
-        new Scanner("src/source", "src/result");
-        
-    }
+
 
 }

@@ -2,6 +2,7 @@
 package Parser;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -124,16 +125,31 @@ public class Token {
     
     public static void output(String filepath) {
         try {
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filepath)));
+            File dir = new File(filepath);
+            if (!dir.mkdirs()) {
+                if (!dir.isDirectory()) {
+                    System.out.println("´´½¨Ä¿Â¼ "+filepath+" Ê§°Ü£¡");
+                    return;
+                }
+            }
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filepath+"/token")));
             int line=1;
             for (Token  token  : tokens) {
                 if (line!=token.line) {
                     System.out.println();
                     line = token.line;
+                    writer.write("\n");
                 }
                 System.out.print(token);
+                writer.write(token.toString());
             }
-        } catch (FileNotFoundException e) {
+            writer.flush();
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filepath+"/id")));
+            for (String string : idList) {
+                writer.write(string+"\n");
+            }
+            writer.flush();
+        } catch ( IOException e) {
             e.printStackTrace();
         }
     }

@@ -234,13 +234,9 @@ public class Scanner {
         return content;
     }
     
-    
-    /**
-     * @param args
-     */
     public static void main(String[] args) {
-        List<String> lines =  inputFromFile("src/Parser/word.dfa");
-
+        new Scanner("src/source", "src/result");
+        
     }
 
 }
