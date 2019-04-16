@@ -32,13 +32,17 @@ public class Production {
 		
 	}
 
-	public static void main(String[] args) {
+	
+	@Override
+    public String toString() {
+        return "Production [" + left + " -> " + right + "]";
+    }
+
+    public static void main(String[] args) {
 		Production production = new Production("iteration_stmt -> for ( isnull_expr ; isnull_expr ; isnull_expr ) block_stmt");
 		System.out.println(production.left);
 		System.out.println(production.right);
 		
 	}
-	
-	
 	
 }
