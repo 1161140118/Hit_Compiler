@@ -1,6 +1,6 @@
 _ ID
-_ UNINT
-_ UNFLOAT
+_ INT
+_ FLOAT
 _ BOOL
 _ STRING
 for

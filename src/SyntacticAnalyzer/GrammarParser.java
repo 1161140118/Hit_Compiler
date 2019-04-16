@@ -1,11 +1,10 @@
-/**
- * 
- */
 package SyntacticAnalyzer;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,8 +18,8 @@ import java.util.Set;
  */
 public class GrammarParser {
     /** 产生式 */
-    Set<Production> productions = new HashSet<>();
-    //Map<String,Production> productions = new HashMap<>();
+    //Set<Production> productions = new HashSet<>();
+    Map<String,List<Production>> productions = new HashMap<>();
     /** 终结符集 */
     Set<String> terminals = new HashSet<>();
     /** 非终结符集 */
@@ -29,27 +28,86 @@ public class GrammarParser {
     Map<String, Set<String>> firstSet = new HashMap<>();
     
     public GrammarParser(String filepath) {
-        getGrammerFromFile(filepath);
-        for (Production production : productions) {
-            System.out.println(production);
+        setGrammerFromFile(filepath);
+        setFirstSet();
+        for (String key : firstSet.keySet()) {
+            System.out.println(key+" : "+firstSet.get(key));
         }
     }
     
     
     
-    private void getGrammerFromFile(String filepath) {
+    
+    
+    
+    
+    
+    
+    
+    private void setFirstSet() {
+        // 遍历终结符,firstSet 为自身
+        for (String string : terminals) {
+            firstSet.put(string, new HashSet<>(Arrays.asList(string)));
+        }
+        // 遍历非终结符
+        for (String string : nonTerminals) {
+            if (firstSet.keySet().contains(string)) {
+                continue;
+            }
+            firstSet.put(string, getFirst(string));
+        }
+    }
+    
+    private Set<String> getFirst(String string){
+        if (firstSet.containsKey(string)) { 
+            // 递归到终结符，或已确定的非终结符，停止
+            return firstSet.get(string);
+        }
+        Set<String> result = new HashSet<>();
+        List<Production> list = productions.get(string);
+        for (Production production : list) {
+            // 遍历可能推导出的右部
+            for (String r : production.right) {
+                Set<String> first = getFirst(r);
+                result.addAll(first);
+                if (!first.contains("$")) {
+                    // 有空产生时，则继续下一个
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    
+    
+    private void setGrammerFromFile(String filepath) {
         try {
             List<String> strings = Files.readAllLines(Paths.get(filepath));
             for (String string : strings) {
-                productions.add(new Production(string));
+                if (string.length()==0||string.charAt(0)=='#') {
+                    continue; // 空行或注释
+                }
+                Production production = new Production(string);
+                nonTerminals.add(production.left);
+                terminals.addAll(production.right);
+                
+                // 加入 productions
+                if (productions.keySet().contains(production.left)) {
+                    productions.get(production.left).add(production);
+                }else {
+                    List<Production> list = new ArrayList<>();
+                    list.add(production);
+                    productions.put(production.left,list);
+                }
+                
             }
+            // 去除所有非终结符，得到终结符
+            terminals.removeAll(nonTerminals);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
     }
-    
-    
 
     /**
      * @param args
@@ -59,3 +117,5 @@ public class GrammarParser {
     }
 
 }
+
+

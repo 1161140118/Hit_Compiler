@@ -1,7 +1,10 @@
+S' -> S
+# 函数定义
 S -> func funcs
 funcs -> func funcs
 funcs -> $
-func -> type IDN ( args ) func_body
+func -> type ID ( args ) func_body
+# 返回类型
 type -> int
 type -> short
 type -> long
@@ -10,19 +13,21 @@ type -> float
 type -> double
 type -> void
 type -> unsigned type
-args -> type IDN arg
+# 参数类型
+args -> type ID arg
 args -> $
-arg -> , type IDN arg
+arg -> , type ID arg
 arg -> $
+
 func_body -> ;
 func_body -> block
 block -> { define_stmts stmts }
 define_stmts -> define_stmt define_stmts
 define_stmts -> $
-define_stmt -> type IDN init vars ;
+define_stmt -> type ID init vars ;
 init -> = expression
 init -> $
-vars -> , IDN init vars
+vars -> , ID init vars
 vars -> $
 stmts -> stmt stmts
 stmts -> $
@@ -46,7 +51,7 @@ bool_expression -> lop expression bool_expression
 bool_expression -> $
 lop -> &&
 lop -> ||
-branch_stmt -> switch ( IDN ) { case_stmt case_stmts default_stmt }
+branch_stmt -> switch ( ID ) { case_stmt case_stmts default_stmt }
 case_stmts -> case_stmt case_stmts
 case_stmts -> $
 case_stmt -> case const : stmts
@@ -80,17 +85,14 @@ item' -> / factor item'
 item' -> % factor item'
 item' -> $
 factor -> ( value )
-factor -> IDN call_func
+factor -> ID call_func
 factor -> const
 call_func -> ( es )
 call_func -> $
 es -> isnull_expr isnull_es
 isnull_es -> , isnull_expr isnull_es
 isnull_es -> $
-const -> num_const
+const -> INT
 const -> FLOAT
 const -> CHAR
 const -> STR
-num_const -> INT10
-num_const -> INT8
-num_const -> INT16
