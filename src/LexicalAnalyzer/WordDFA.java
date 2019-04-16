@@ -1,7 +1,7 @@
 /**
  * 
  */
-package Parser;
+package LexicalAnalyzer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,7 +52,7 @@ public class WordDFA implements DFA {
 
     /**
      * 初始化转移表和中介状态
-     * @see Parser.DFA#init(java.lang.String)
+     * @see LexicalAnalyzer.DFA#init(java.lang.String)
      */
     @Override
     public void init(String dfaFilePath) {

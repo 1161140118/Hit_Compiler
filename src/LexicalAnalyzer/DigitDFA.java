@@ -1,7 +1,7 @@
 /**
  * 
  */
-package Parser;
+package LexicalAnalyzer;
 
 /**
  * @author chen
