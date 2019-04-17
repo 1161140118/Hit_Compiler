@@ -19,13 +19,13 @@ import java.util.Set;
 public class GrammarParser {
     /** 产生式 */
     //Set<Production> productions = new HashSet<>();
-    Map<String,List<Production>> productions = new HashMap<>();
+    public static final Map<String,List<Production>> productions = new HashMap<>();
     /** 终结符集 */
-    Set<String> terminals = new HashSet<>();
+    public static final Set<String> terminals = new HashSet<>();
     /** 非终结符集 */
-    Set<String> nonTerminals = new HashSet<>();
+    public static final Set<String> nonTerminals = new HashSet<>();
     /** First集 */
-    Map<String, Set<String>> firstSet = new HashMap<>();
+    public static final Map<String, Set<String>> firstSet = new HashMap<>();
     
     public GrammarParser(String filepath) {
         setGrammerFromFile(filepath);
@@ -34,11 +34,6 @@ public class GrammarParser {
             System.out.println(key+" : "+firstSet.get(key));
         }
     }
-    
-    
-    
-    
-    
     
     
     
@@ -108,7 +103,12 @@ public class GrammarParser {
             e.printStackTrace();
         }
     }
-
+    
+    public static boolean isTerminal(String string) {
+    	return terminals.contains(string);
+    }
+    
+    
     /**
      * @param args
      */

@@ -14,7 +14,6 @@ import java.util.Set;
  */
 public class ItemSet {
     public static Map<Item, Integer> itemId = new HashMap<>();
-    public static Set<String> terminals;
     int id;
     Item prim;
     List<Item> items= new LinkedList<>();
@@ -40,7 +39,7 @@ public class ItemSet {
         
         // 终结符，移入
         String next = prim.getNext();
-        if (terminals.contains(next)) {
+        if (GrammarParser.isTerminal(next)) {
             
             
         }else {// 非终结符，转移
@@ -49,6 +48,16 @@ public class ItemSet {
     }
     
     private void generateItems() {
+        String next = prim.getNext();
+        if (GrammarParser.isTerminal(next)) {
+			return;
+		}
+        List<Production> productions = GrammarParser.productions.get(next);
+        for (Production production : productions) {
+			
+        	items.add(new Item(production, 0, prim.look));
+		}
+        
         
     }
     
@@ -73,6 +82,17 @@ class Item{
     
     String getNext() {
         return production.right.get(next);
+    }
+    
+    Set<String> getLook() {
+    	if (production.right.size()==next-1) {
+			return look;
+		}
+    	String follow = production.right.get(next+1);
+    	if (GrammarParser.isTerminal(follow)) {
+			
+		}
+    	return null;
     }
 
     @Override
