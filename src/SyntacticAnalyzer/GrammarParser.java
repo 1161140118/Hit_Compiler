@@ -26,20 +26,16 @@ public class GrammarParser {
     public static final Set<String> nonTerminals = new HashSet<>();
     /** First集 */
     public static final Map<String, Set<String>> firstSet = new HashMap<>();
+    /** 开始产生式 */
+    public static Production START;
     
-    public GrammarParser(String filepath) {
+    
+    public static void parseGrammar(String filepath) {
         setGrammerFromFile(filepath);
         setFirstSet();
-        for (String key : firstSet.keySet()) {
-            System.out.println(key+" : "+firstSet.get(key));
-        }
     }
     
-    
-    
-    
-    
-    private void setFirstSet() {
+    private static void setFirstSet() {
         // 遍历终结符,firstSet 为自身
         for (String string : terminals) {
             firstSet.put(string, new HashSet<>(Arrays.asList(string)));
@@ -53,7 +49,7 @@ public class GrammarParser {
         }
     }
     
-    private Set<String> getFirst(String string){
+    private static Set<String> getFirst(String string){
         if (firstSet.containsKey(string)) { 
             // 递归到终结符，或已确定的非终结符，停止
             return firstSet.get(string);
@@ -74,9 +70,8 @@ public class GrammarParser {
         return result;
     }
     
-    
-    
-    private void setGrammerFromFile(String filepath) {
+    private static void setGrammerFromFile(String filepath) {
+    	boolean start= true;
         try {
             List<String> strings = Files.readAllLines(Paths.get(filepath));
             for (String string : strings) {
@@ -96,6 +91,11 @@ public class GrammarParser {
                     productions.put(production.left,list);
                 }
                 
+                if (start) { // 设置开始产生式
+					START = production;
+					start=false;
+				}
+                
             }
             // 去除所有非终结符，得到终结符
             terminals.removeAll(nonTerminals);
@@ -108,13 +108,6 @@ public class GrammarParser {
     	return terminals.contains(string);
     }
     
-    
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        new GrammarParser("src/SyntacticAnalyzer/grammar");
-    }
 
 }
 

@@ -43,7 +43,7 @@ public class ItemSet {
     
     public void generate() {
         // 规约
-        if (prim.production.right.size()==id) {
+        if (prim.production.right.size()<=prim.next) {
             Table.addReg(id,prim.production,prim.look);
             return;
         }
@@ -83,7 +83,7 @@ public class ItemSet {
     
     private void generateItemSets(Item curItem) {
         String next = curItem.getNext();
-        Item item = new Item(curItem.production, curItem.next++, curItem.look);
+        Item item = new Item(curItem.production, curItem.next+1, curItem.look);
         // 项目集转移
         int newId;
         if (itemIds.containsKey(item)) {
@@ -101,8 +101,6 @@ public class ItemSet {
             newId = curId++;
             ItemSet newSet = new ItemSet(newId, item.production, item.next, item.look);
             itemIds.put(item, newId);
-            // 递归产生
-            newSet.generate();
             // 转移到新项目
             if (GrammarParser.isTerminal(next)) {
                 // 移入
@@ -111,6 +109,8 @@ public class ItemSet {
                 // Goto
                 Table.addGoto(id,next,newId);
             }
+            // 递归产生
+            newSet.generate();
         }
         
     }
@@ -119,8 +119,8 @@ public class ItemSet {
 }
 
 class Item{
-    Production production;
-    int next;
+    final Production production;
+    final int next;
     Set<String> look;
     
     public Item(Production production, int next, Set<String> look) {
@@ -135,7 +135,7 @@ class Item{
     }
     
     Set<String> getLook() {
-    	if (production.right.size()==next-1) { // 末尾
+    	if (production.right.size()<=next+1) { // next的下一个，末尾
 			return look;
 		}
     	String follow = production.right.get(next+1);

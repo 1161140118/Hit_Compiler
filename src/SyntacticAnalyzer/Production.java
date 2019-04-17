@@ -70,7 +70,7 @@ public class Production {
 
     @Override
     public String toString() {
-        return left + " -> " + right + "]";
+        return left + " -> " + right;
     }
     
     public static void main(String[] args) {

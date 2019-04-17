@@ -9,6 +9,13 @@ package SyntacticAnalyzer;
  */
 public class SynAnalyzer {
     
+	
+	public void initTable(String grammarPath) {
+		GrammarParser.parseGrammar(grammarPath);
+		System.out.println("Grammar Parse Complete.");
+		ItemSet.startGenerateClosure(GrammarParser.START);
+		Table.output();
+	}
     
     
     
@@ -17,8 +24,8 @@ public class SynAnalyzer {
      * @param args
      */
     public static void main(String[] args) {
-        // TODO Auto-generated method stub
-
+    	new SynAnalyzer().initTable("src/SyntacticAnalyzer/grammar");;
+    	new SynAnalyzer().initTable("src/SyntacticAnalyzer/test");
     }
 
 }

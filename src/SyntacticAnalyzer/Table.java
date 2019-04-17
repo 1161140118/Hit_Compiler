@@ -49,7 +49,18 @@ public class Table {
         map.put(string, action);
         table.put(src, map);
     }
-
+    
+    public static void output() {
+    	for (Integer integer : table.keySet()) {
+			Map<String, Action> map = table.get(integer);
+			System.out.print(integer+" : ");
+			for (String string : map.keySet()) {
+				Action action = map.get(string);
+				System.out.print("["+string+":"+action.toString()+"]");
+			}
+			System.out.println();
+		}
+    }
 }
 
 class Action{
@@ -67,6 +78,25 @@ class Action{
         super();
         this.type = type;
         this.production = production;
+    }
+    
+    @Override
+    public String toString() {
+    	String act = "";
+    	switch (type) {
+		case 1:
+			act = "S"+target;
+			break;
+		case 3:
+			act = ""+type;
+			break;
+		case 2:
+			act = "R "+production.toString();
+			break;
+		default:
+			break;
+		}
+    	return act;
     }
     
 }
