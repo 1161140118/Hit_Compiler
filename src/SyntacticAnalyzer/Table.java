@@ -17,8 +17,16 @@ public class Table {
     public static final int Goto=3;
     static Map<Integer, Map<String,Action>> table = new HashMap<>();
     
-    public static void addShift() {
-        
+    public static void addShift(int src,String string,int target) {
+        Action action = new Action(Shift, target);
+        if (table.keySet().contains(src)) {
+            // 源状态已存在
+            table.get(src).put(string, action);
+            return;
+        }
+        Map<String, Action> map = new HashMap<>();
+        map.put(string, action);
+        table.put(src, map);
     }
     
     public static void addReg(int id,Production production,Set<String> strings) {
@@ -30,8 +38,16 @@ public class Table {
         table.put(id, map);
     }
     
-    public static void addGoto() {
-        
+    public static void addGoto(int src, String string, int target) {
+        Action action = new Action(Goto, target);
+        if (table.keySet().contains(src)) {
+            // 源状态已存在
+            table.get(src).put(string, action);
+            return;
+        }
+        Map<String, Action> map = new HashMap<>();
+        map.put(string, action);
+        table.put(src, map);
     }
 
 }

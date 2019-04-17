@@ -68,11 +68,15 @@ public class Production {
         return true;
     }
 
-
-
     @Override
     public String toString() {
-        return "Production [" + left + " -> " + right + "]";
+        return left + " -> " + right + "]";
+    }
+    
+    public static void main(String[] args) {
+        int id = 1;
+        System.out.println(id++);
+        System.out.println(id);
     }
 	
 }
