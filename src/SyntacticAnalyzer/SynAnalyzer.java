@@ -24,8 +24,9 @@ public class SynAnalyzer {
      * @param args
      */
     public static void main(String[] args) {
-    	new SynAnalyzer().initTable("src/SyntacticAnalyzer/grammar");;
-    	new SynAnalyzer().initTable("src/SyntacticAnalyzer/test");
+//    	new SynAnalyzer().initTable("src/SyntacticAnalyzer/grammar");;
+//    	new SynAnalyzer().initTable("src/SyntacticAnalyzer/test1");
+    	new SynAnalyzer().initTable("src/SyntacticAnalyzer/test2");
     }
 
 }
