@@ -33,10 +33,12 @@ public class GrammarParser {
 
 
     public static void parseGrammar(String filepath) {
+        // 从文件中获得文法
         setGrammerFromFile(filepath);
+        // 计算 First 集
         setFirstSet();
+        // 去除 $
         dropEmpty();
-        startSymbol = START.left;
     }
 
     /**
@@ -73,6 +75,10 @@ public class GrammarParser {
         List<Production> list = productions.get(string);
         for (Production production : list) {
             // 遍历可能推导出的右部
+            if (production.right.get(0).equals(string)) {
+                // 左递归
+                continue;
+            }
             for (String r : production.right) {
                 Set<String> first = getFirst(r);
                 result.addAll(first);
@@ -108,6 +114,7 @@ public class GrammarParser {
 
                 if (start) { // 设置开始产生式
                     START = production;
+                    startSymbol = production.left;
                     start = false;
                 }
 

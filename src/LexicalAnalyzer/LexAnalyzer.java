@@ -13,7 +13,7 @@ import java.util.List;
  * @author chen
  *
  */
-public class Scanner {
+public class LexAnalyzer {
     /** 输入缓冲 */ 
     private List<String> content = new ArrayList<>();
     /** 当前行数 */
@@ -33,7 +33,7 @@ public class Scanner {
      *  output/id
      *  output/token
      */
-    public Scanner(String input,String output) {
+    public LexAnalyzer(String input,String output) {
         // 初始化 DFA
         wordDFA.init("src/LexicalAnalyzer/word.dfa");
         digitDFA.init("src/LexicalAnalyzer/digit.dfa");
@@ -56,7 +56,7 @@ public class Scanner {
      *  output/token
      */
     public static void startLexicalAnalyzer(String input,String output) {
-        new Scanner(input, output);
+        new LexAnalyzer(input, output);
     }
     
     // 主控
@@ -247,11 +247,6 @@ public class Scanner {
             e.printStackTrace();
         }
         return content;
-    }
-    
-    public static void main(String[] args) {
-        new Scanner("src/source", "src/result");
-        
     }
 
 }

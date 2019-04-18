@@ -100,7 +100,10 @@ public class Token {
         addToken(new Token(1, value, line));
     }
 
-    
+    /********************
+     *  SynAnalyzer µ÷ÓÃ
+     ********************/
+
     public int getClassid() {
         return classid;
     }
@@ -111,6 +114,10 @@ public class Token {
 
     public static List<Token> getTokens() {
         return tokens;
+    }
+
+    public static List<String> getIdList() {
+        return idList;
     }
 
     /**

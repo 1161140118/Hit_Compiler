@@ -11,7 +11,7 @@ import java.util.Set;
  * @author standingby
  * Action table, Goto table
  */
-public class Table {
+public class LRTable {
     public static final int Shift=1;
     public static final int Reg=2;
     public static final int Goto=3;
