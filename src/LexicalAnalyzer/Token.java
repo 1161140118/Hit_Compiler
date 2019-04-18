@@ -25,7 +25,7 @@ public class Token {
     /** ±êÊ¶·û */
     private static List<String> idList = new LinkedList<>();
     /** ¼ÇÂ¼token×Ö */
-    public static List<Token> tokens = new LinkedList<>();
+    private static List<Token> tokens = new LinkedList<>();
 
     private int classid;
     private int intValue = -1;
@@ -98,6 +98,19 @@ public class Token {
             idList.add(word);
         }
         addToken(new Token(1, value, line));
+    }
+
+    
+    public int getClassid() {
+        return classid;
+    }
+
+    public static Map<Integer, String> getTokenTable() {
+        return tokenTable;
+    }
+
+    public static List<Token> getTokens() {
+        return tokens;
     }
 
     /**

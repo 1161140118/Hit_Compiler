@@ -28,6 +28,10 @@ public class Scanner {
     
     /**
      * 
+     * @param input 源程序文件
+     * @param output    输出文件目录
+     *  output/id
+     *  output/token
      */
     public Scanner(String input,String output) {
         // 初始化 DFA
@@ -42,6 +46,17 @@ public class Scanner {
         curline = content.get(rows);
         controller();
         Token.output(output);
+    }
+    
+    /**
+     * 
+     * @param input 源程序文件
+     * @param output    输出文件目录
+     *  output/id
+     *  output/token
+     */
+    public static void startLexicalAnalyzer(String input,String output) {
+        new Scanner(input, output);
     }
     
     // 主控
