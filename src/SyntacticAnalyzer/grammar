@@ -1,9 +1,11 @@
 S' -> S
+
 # 函数定义
 S -> func funcs
 funcs -> func funcs
 funcs -> $
 func -> type ID ( args ) func_body
+
 # 返回类型
 type -> int
 type -> short
@@ -13,15 +15,19 @@ type -> float
 type -> double
 type -> void
 type -> unsigned type
+
 # 参数类型
 args -> type ID arg
 args -> $
 arg -> , type ID arg
 arg -> $
 
+# 函数体
 func_body -> ;
 func_body -> block
 block -> { define_stmts stmts }
+
+# 定义语句
 define_stmts -> define_stmt define_stmts
 define_stmts -> $
 define_stmt -> type ID init vars ;
@@ -31,6 +37,8 @@ vars -> , ID init vars
 vars -> $
 stmts -> stmt stmts
 stmts -> $
+
+#语句
 stmt -> assign_stmt
 stmt -> jump_stmt
 stmt -> iteration_stmt
@@ -39,18 +47,28 @@ assign_stmt -> expression ;
 jump_stmt -> continue ;
 jump_stmt -> break ;
 jump_stmt -> return isnull_expr ;
+
+# 循环
 iteration_stmt -> while ( logical_expression ) block_stmt
 iteration_stmt -> for ( isnull_expr ; isnull_expr ; isnull_expr ) block_stmt
 iteration_stmt -> do block_stmt while ( logical_expression ) ;
+
+# 分支
 branch_stmt -> if ( logical_expression ) block_stmt result
 result -> else block_stmt
 result -> $
+
+# 逻辑运算式
 logical_expression -> ! expression bool_expression
 logical_expression -> expression bool_expression
+
+# 布尔表达式
 bool_expression -> lop expression bool_expression
 bool_expression -> $
 lop -> &&
 lop -> ||
+
+# switch 语句
 branch_stmt -> switch ( ID ) { case_stmt case_stmts default_stmt }
 case_stmts -> case_stmt case_stmts
 case_stmts -> $
@@ -63,6 +81,8 @@ expression -> value operation
 operation -> compare_op value
 operation -> equal_op value
 operation -> $
+
+# 算符
 compare_op -> >
 compare_op -> >=
 compare_op -> <
