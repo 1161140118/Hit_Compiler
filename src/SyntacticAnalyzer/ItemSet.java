@@ -3,7 +3,7 @@ package SyntacticAnalyzer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +19,7 @@ public class ItemSet {
     /** 项目集标记属性 */
     private final int id;
     private final Item prim;
-    private Map<String, Item> prodStates = new HashMap<>();
+    private Map<String, Item> prodStates = new LinkedHashMap<>();
     
     public ItemSet(int id,Production production, int next, Set<String> look) {
         super();
@@ -67,7 +67,7 @@ public class ItemSet {
      * @param curItem
      */
     private void generateItems(Item curItem) {
-    	System.out.println("计算闭包："+curItem.prodState());
+//    	System.out.println("计算闭包："+curItem.prodState());
         String next = curItem.getNext();
         if (next==null) { // 规约项目
 			return;
@@ -107,6 +107,7 @@ public class ItemSet {
                 Table.addShift(curId,next,newId);
             }else {
                 // Goto
+//                System.out.println("转移已存在闭包："+newItem.prodState()+" when "+next+" "+curId+"-"+newId);
                 Table.addGoto(curId,next,newId);
             }
         }else {
@@ -120,6 +121,7 @@ public class ItemSet {
                 Table.addShift(curId,next,newId);
             }else {
                 // Goto
+//                System.out.println("转移新闭包:"+newItem.prodState()+" when "+next+" "+curId+"-"+newId);
                 Table.addGoto(curId,next,newId);
             }
             // 递归产生

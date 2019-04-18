@@ -19,6 +19,7 @@ public class Table {
     
     public static void addShift(int src,String string,int target) {
         Action action = new Action(Shift, target);
+        System.out.println(src+" 记录移入S："+string+":"+action.toString());
         if (table.keySet().contains(src)) {
             // 源状态已存在
             table.get(src).put(string, action);
@@ -29,17 +30,19 @@ public class Table {
         table.put(src, map);
     }
     
-    public static void addReg(int id,Production production,Set<String> strings) {
+    public static void addReg(int src,Production production,Set<String> strings) {
         Action action = new Action(Reg,production);
+        System.out.println(src+" 记录规约R："+strings+":"+action.toString());
         Map<String, Action> map = new HashMap<>();
         for (String string : strings) {
             map.put(string, action);
         }
-        table.put(id, map);
+        table.put(src, map);
     }
     
     public static void addGoto(int src, String string, int target) {
         Action action = new Action(Goto, target);
+        System.out.println(src+" 记录转移G："+string+":"+action.toString());
         if (table.keySet().contains(src)) {
             // 源状态已存在
             table.get(src).put(string, action);
@@ -53,6 +56,7 @@ public class Table {
     public static void output() {
     	for (Integer integer : table.keySet()) {
 			Map<String, Action> map = table.get(integer);
+			
 			System.out.print(integer+" : ");
 			for (String string : map.keySet()) {
 				Action action = map.get(string);
@@ -88,7 +92,7 @@ class Action{
 			act = "S"+target;
 			break;
 		case 3:
-			act = ""+type;
+			act = ""+target;
 			break;
 		case 2:
 			act = "R "+production.toString();
