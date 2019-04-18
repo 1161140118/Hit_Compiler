@@ -20,6 +20,7 @@ public class ItemSet {
     private final int id;
     private final Item prim;
     private Map<String, Item> prodStates = new LinkedHashMap<>();
+    private Map<String, ItemSet> nextItemSet = new LinkedHashMap<>();
     
     public ItemSet(int id,Production production, int next, Set<String> look) {
         super();
@@ -47,11 +48,12 @@ public class ItemSet {
     private static void generate(ItemSet thisSet) {
         // 规约
         if (thisSet.prim.production.right.size()==thisSet.prim.next) {
-            Table.addReg(thisSet.id,thisSet.prim.production,thisSet.prim.look);
+            LRTable.addReg(thisSet.id,thisSet.prim.production,thisSet.prim.look);
             return;
         }
         // 产生项目集
         thisSet.generateItems(thisSet.prim);
+        
         // 对项目集内项目进行转移
         // Prim项目
         generateItemSets(thisSet.prim,thisSet.id);
@@ -63,23 +65,25 @@ public class ItemSet {
     }
     
     /**
-     * 仅在当前对象内递归，计算闭包
-     * @param curItem
+     * 在当前项目内，计算闭包
+     * 由Prim或Prim所产生项目调用，仅在当前对象内递归，计算闭包
+     * @param curItem 产生闭包的项目
      */
     private void generateItems(Item curItem) {
 //    	System.out.println("计算闭包："+curItem.prodState());
         String next = curItem.getNext();
-        if (next==null) { // 规约项目
+        if (next==null) { // 闭包内空规约项目
+            LRTable.addReg(this.id, curItem.production, curItem.look);
 			return;
 		}
-        if (GrammarParser.isTerminal(next)) { // 移入项目
+        if (GrammarParser.isTerminal(next)) { // 移入项目,产生项目集时处理
 			return;
 		}
         // 产生项目集内项目
         List<Production> productions = GrammarParser.productions.get(next);
         Set<String> curLook = curItem.getLook(); // 继承展望符
         for (Production production : productions) {
-            Item item = new Item(production, 0, curLook);
+            Item item = new Item(   production, 0, curLook);
             if (this.prodStates.keySet().contains(item.prodState())) {
                 // 项目已存在，合并look
                 this.prodStates.get(item.prodState()).look.addAll(curLook);
@@ -104,11 +108,11 @@ public class ItemSet {
             int newId = itemIds.get(newItem);
             if (GrammarParser.isTerminal(next)) {
                 // 移入
-                Table.addShift(curId,next,newId);
+                LRTable.addShift(curId,next,newId);
             }else {
                 // Goto
 //                System.out.println("转移已存在闭包："+newItem.prodState()+" when "+next+" "+curId+"-"+newId);
-                Table.addGoto(curId,next,newId);
+                LRTable.addGoto(curId,next,newId);
             }
         }else {
             // 产生新项目集
@@ -118,16 +122,15 @@ public class ItemSet {
             // 转移到新项目
             if (GrammarParser.isTerminal(next)) {
                 // 移入
-                Table.addShift(curId,next,newId);
+                LRTable.addShift(curId,next,newId);
             }else {
                 // Goto
 //                System.out.println("转移新闭包:"+newItem.prodState()+" when "+next+" "+curId+"-"+newId);
-                Table.addGoto(curId,next,newId);
+                LRTable.addGoto(curId,next,newId);
             }
             // 递归产生
             generate(newSet);
         }
-        
     }
     
 
