@@ -14,7 +14,9 @@ import java.util.Set;
  */
 public class ItemSet {
     public static Map<Item, Integer> itemIds = new HashMap<>();
-    static int curId=0;
+    static int maxId=0; // 新项目集序号
+    
+    /** 项目集标记属性 */
     private final int id;
     private final Item prim;
     private Map<String, Item> prodStates = new HashMap<>();
@@ -22,12 +24,13 @@ public class ItemSet {
     public ItemSet(int id,Production production, int next, Set<String> look) {
         super();
         this.id = id;
-        prim = new Item(production, next, look);
+        this.prim = new Item(production, next, look);
     }
     
     public static void startGenerateClosure(Production start) {
-        ItemSet first = new ItemSet(curId++, start, 0, new HashSet<>(Arrays.asList("#")));
-        first.generate();
+        ItemSet first = new ItemSet(maxId++, start, 0, new HashSet<>(Arrays.asList("#")));
+        itemIds.put(first.prim, first.id);
+        generate(first);
     }
     
     /**************
@@ -41,76 +44,86 @@ public class ItemSet {
      * 2.3 对新项目，若不存在，则新建项目集，并从1开始
      **************/
     
-    public void generate() {
+    private static void generate(ItemSet thisSet) {
         // 规约
-        if (prim.production.right.size()<=prim.next) {
-            Table.addReg(id,prim.production,prim.look);
+        if (thisSet.prim.production.right.size()==thisSet.prim.next) {
+            Table.addReg(thisSet.id,thisSet.prim.production,thisSet.prim.look);
             return;
         }
         // 产生项目集
-        generateItems(prim);
+        thisSet.generateItems(thisSet.prim);
         // 对项目集内项目进行转移
-        // Key项目
-        generateItemSets(prim);
+        // Prim项目
+        generateItemSets(thisSet.prim,thisSet.id);
         // 其他项目
-        for (Item item : prodStates.values()) {
-            generateItemSets(item);
+        for (Item item : thisSet.prodStates.values()) {
+            generateItemSets(item,thisSet.id);
         }
         
     }
     
+    /**
+     * 仅在当前对象内递归，计算闭包
+     * @param curItem
+     */
     private void generateItems(Item curItem) {
+    	System.out.println("计算闭包："+curItem.prodState());
         String next = curItem.getNext();
-        if (GrammarParser.isTerminal(next)) {
+        if (next==null) { // 规约项目
+			return;
+		}
+        if (GrammarParser.isTerminal(next)) { // 移入项目
 			return;
 		}
         // 产生项目集内项目
         List<Production> productions = GrammarParser.productions.get(next);
-        Set<String> curLook = curItem.getLook();
+        Set<String> curLook = curItem.getLook(); // 继承展望符
         for (Production production : productions) {
             Item item = new Item(production, 0, curLook);
-            if (prodStates.keySet().contains(item.prodState())) {
+            if (this.prodStates.keySet().contains(item.prodState())) {
                 // 项目已存在，合并look
-                prodStates.get(item.prodState()).look.addAll(curLook);
+                this.prodStates.get(item.prodState()).look.addAll(curLook);
                 continue;
             }
             // 新项目
-            prodStates.put(item.prodState(), item);
+            this.prodStates.put(item.prodState(), item);
             // 递归添加新项目可产生的所有项目
-            generateItems(item);
+            this.generateItems(item);
 		}
     }
     
-    private void generateItemSets(Item curItem) {
+    private static void generateItemSets(Item curItem,int curId) {
         String next = curItem.getNext();
-        Item item = new Item(curItem.production, curItem.next+1, curItem.look);
+        if (next==null) { // 规约项目 
+			return;
+		}
+        Item newItem = new Item(curItem.production, curItem.next+1, curItem.look);
         // 项目集转移
-        int newId;
-        if (itemIds.containsKey(item)) {
+        if (itemIds.containsKey(newItem)) {
             // 目标项目集已存在
-            newId = itemIds.get(item);
+            int newId = itemIds.get(newItem);
             if (GrammarParser.isTerminal(next)) {
                 // 移入
-                Table.addShift(id,next,newId);
+                Table.addShift(curId,next,newId);
             }else {
                 // Goto
-                Table.addGoto(id,next,newId);
+                Table.addGoto(curId,next,newId);
             }
         }else {
             // 产生新项目集
-            newId = curId++;
-            ItemSet newSet = new ItemSet(newId, item.production, item.next, item.look);
-            itemIds.put(item, newId);
+            int newId = maxId++;
+            ItemSet newSet = new ItemSet(newId, newItem.production, newItem.next, newItem.look);
+            itemIds.put(newItem, newId);
             // 转移到新项目
             if (GrammarParser.isTerminal(next)) {
                 // 移入
-                Table.addShift(id,next,newId);
+                Table.addShift(curId,next,newId);
             }else {
                 // Goto
-                Table.addGoto(id,next,newId);
+                Table.addGoto(curId,next,newId);
             }
             // 递归产生
-            newSet.generate();
+            generate(newSet);
         }
         
     }
@@ -131,7 +144,11 @@ class Item{
     }
     
     String getNext() {
-        return production.right.get(next);
+    	if (next<production.right.size()) {
+    		return production.right.get(next);
+		}else {
+			return null;
+		}
     }
     
     Set<String> getLook() {

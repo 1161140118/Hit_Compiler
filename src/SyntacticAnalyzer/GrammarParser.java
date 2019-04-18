@@ -33,6 +33,18 @@ public class GrammarParser {
     public static void parseGrammar(String filepath) {
         setGrammerFromFile(filepath);
         setFirstSet();
+        dropEmpty();
+    }
+    
+    /**
+     * delete $ in production.
+     */
+    private static void dropEmpty() {
+    	for (List<Production> list : productions.values()) {
+			for (Production production : list) {
+				production.right.remove("$");
+			}
+		}
     }
     
     private static void setFirstSet() {
@@ -62,7 +74,7 @@ public class GrammarParser {
                 Set<String> first = getFirst(r);
                 result.addAll(first);
                 if (!first.contains("$")) {
-                    // 有空产生时，则继续下一个
+                    // 有空产生式，则继续下一个
                     break;
                 }
             }

@@ -15,6 +15,7 @@ public class SynAnalyzer {
 		System.out.println("Grammar Parse Complete.");
 		ItemSet.startGenerateClosure(GrammarParser.START);
 		Table.output();
+		System.out.println("Construct Table Complete.");
 	}
     
     
