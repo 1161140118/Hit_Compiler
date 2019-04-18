@@ -65,8 +65,6 @@ public class Scanner {
             char ch = next();
             sort(ch);
         }
-        // 追加终结符 #
-        Token.addToken(new Token(Token.getCode("#"), "#" , rows+1));
     }
     
     // 单词分类
