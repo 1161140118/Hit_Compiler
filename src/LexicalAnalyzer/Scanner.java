@@ -31,11 +31,11 @@ public class Scanner {
      */
     public Scanner(String input,String output) {
         // 初始化 DFA
-        wordDFA.init("src/Parser/word.dfa");
-        digitDFA.init("src/Parser/digit.dfa");
+        wordDFA.init("src/LexicalAnalyzer/word.dfa");
+        digitDFA.init("src/LexicalAnalyzer/digit.dfa");
         wordDFA.reset();
         digitDFA.reset();
-        Token.initTable("src/Parser/sortcode");
+        Token.initTable("src/LexicalAnalyzer/sortcode");
         // 读文件
         content = inputFromFile(input);
         // 初始化当前行
@@ -50,6 +50,8 @@ public class Scanner {
             char ch = next();
             sort(ch);
         }
+        // 追加终结符 #
+        Token.addToken(new Token(Token.getCode("#"), "#" , rows+1));
     }
     
     // 单词分类

@@ -2,7 +2,7 @@ _ ID
 _ INT
 _ FLOAT
 _ BOOL
-_ STRING
+_ STR
 for
 do
 while
@@ -33,4 +33,4 @@ struct
 {
 }
 ;
-
+#
