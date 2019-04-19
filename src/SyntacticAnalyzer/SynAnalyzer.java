@@ -29,6 +29,7 @@ public class SynAnalyzer {
     
     public SynAnalyzer(String sourceCode,String grammarPath,String lexicaloutput) {
         initTable(grammarPath);
+        LRTable.output(lexicaloutput+"/table");
         LexAnalyzer.startLexicalAnalyzer(sourceCode, lexicaloutput);
         initLexicalMessage();
         initStack();
@@ -99,7 +100,6 @@ public class SynAnalyzer {
         GrammarParser.parseGrammar(grammarPath);
         System.out.println("Grammar Parse Complete.");
         ItemSet.startGenerateClosure(GrammarParser.START);
-        LRTable.output();
         System.out.println("Construct Table Complete.");
     }
 

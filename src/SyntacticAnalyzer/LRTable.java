@@ -3,6 +3,11 @@
  */
 package SyntacticAnalyzer;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -53,17 +58,23 @@ public class LRTable {
         table.put(src, map);
     }
     
-    public static void output() {
-    	for (Integer integer : table.keySet()) {
-			Map<String, Action> map = table.get(integer);
-			
-			System.out.print(integer+" : ");
-			for (String string : map.keySet()) {
-				Action action = map.get(string);
-				System.out.print("["+string+":"+action.toString()+"]");
-			}
-			System.out.println();
-		}
+    public static void output(String filepath) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(filepath))));
+            for (Integer integer : table.keySet()) {
+                Map<String, Action> map = table.get(integer);
+                writer.write(integer+" : ");
+                for (String string : map.keySet()) {
+                    Action action = map.get(string);
+                    writer.write("["+string+":"+action.toString()+"]");
+                }
+                writer.write("\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
 

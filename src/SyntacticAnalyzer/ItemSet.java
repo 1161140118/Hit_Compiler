@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +43,6 @@ public class ItemSet {
         first.id = maxId++;
         itemSetIds.put(first, first.id);
 
-//        // first 产生闭包
-//        first.generate();
-        // first 入队
         queue.add(first);
         while (!queue.isEmpty()) {
             ItemSet top = queue.poll();
@@ -71,7 +67,6 @@ public class ItemSet {
                     } else {
                         LRTable.addGoto(top.id, string, nextSet.id);
                     }
-//                    nextSet.generate();
                 }
             }
         }
