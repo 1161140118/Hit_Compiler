@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -13,25 +15,53 @@ import java.util.Set;
  *  构造项目集闭包，通过DFA转移填充Table
  */
 public class ItemSet {
-    public static Map<Item, Integer> itemIds = new HashMap<>();
+    private static Map<ItemSet, Integer> itemSetIds = new HashMap<>();
+    private static Queue<ItemSet> queue = new LinkedList<>();
     static int maxId=0; // 新项目集序号
     
     /** 项目集标记属性 */
+    
     private final int id;
-    private final Item prim;
+    private final Set<Item> prim = new HashSet<>();
+    /** 记录相同项目 */
     private Map<String, Item> prodStates = new LinkedHashMap<>();
     private Map<String, ItemSet> nextItemSet = new LinkedHashMap<>();
+    
+    public ItemSet(int id,Item item) {
+        super();
+        this.id = id;
+        this.prim.add(item);
+    }
     
     public ItemSet(int id,Production production, int next, Set<String> look) {
         super();
         this.id = id;
-        this.prim = new Item(production, next, look);
+        this.prim.add(new Item(production, next, look));
     }
     
     public static void startGenerateClosure(Production start) {
         ItemSet first = new ItemSet(maxId++, start, 0, new HashSet<>(Arrays.asList("#")));
-        itemIds.put(first.prim, first.id);
+        itemSetIds.put(first, first.id);
         generate(first);
+        queue.add(first);
+        while(!queue.isEmpty()) {
+            ItemSet top = queue.poll();
+            top.generateClosure();
+            if (top.nextItemSet.size()==0) {
+                // 规约 TODO
+                continue;
+            }
+            for (String string : top.nextItemSet.keySet()) {
+                ItemSet nextSet = top.nextItemSet.get(start);
+                if (itemSetIds.containsKey(nextSet)) {
+                    // prim 已存在 跳转 TODO
+                }else {
+                    // 新集，生成闭包，入队
+                }
+                
+            }
+            
+        }
     }
     
     /**************
@@ -46,22 +76,27 @@ public class ItemSet {
      **************/
     
     private static void generate(ItemSet thisSet) {
-        // 规约
-        if (thisSet.prim.production.right.size()==thisSet.prim.next) {
-            LRTable.addReg(thisSet.id,thisSet.prim.production,thisSet.prim.look);
-            return;
+        // 遍历prim集，产生项目
+        for (Item item : thisSet.prim) {
+            if (item.production.right.size()==item.next) {
+                // 规约项目，在generateItemSets中处理
+//                LRTable.addReg(thisSet.id,item.production,item.look);
+                return;
+            }
+            // 产生项目集
+            thisSet.generateItems(item);
         }
-        // 产生项目集
-        thisSet.generateItems(thisSet.prim);
-        
-        // 对项目集内项目进行转移
+    }
+    
+    private void generateClosure() {
         // Prim项目
-        generateItemSets(thisSet.prim,thisSet.id);
-        // 其他项目
-        for (Item item : thisSet.prodStates.values()) {
-            generateItemSets(item,thisSet.id);
+        for (Item item : prim) {
+            generateItemSets(item,id);
         }
-        
+        // 其他项目
+        for (Item item : prodStates.values()) {
+            generateItemSets(item,id);
+        }
     }
     
     /**
@@ -72,7 +107,7 @@ public class ItemSet {
     private void generateItems(Item curItem) {
 //    	System.out.println("计算闭包："+curItem.prodState());
         String next = curItem.getNext();
-        if (next==null) { // 闭包内空规约项目
+        if (next==null) { // 闭包内 空产生式 规约项目
             LRTable.addReg(this.id, curItem.production, curItem.look);
 			return;
 		}
@@ -96,30 +131,32 @@ public class ItemSet {
 		}
     }
     
-    private static void generateItemSets(Item curItem,int curId) {
+    private void generateItemSets(Item curItem,int curId) {
         String next = curItem.getNext();
         if (next==null) { // 规约项目 
+            LRTable.addReg(curId,curItem.production,curItem.look);
 			return;
 		}
         Item newItem = new Item(curItem.production, curItem.next+1, curItem.look);
         // 项目集转移
-        if (itemIds.containsKey(newItem)) {
+        if (nextItemSet.containsKey(next)) { // 根据转移符标志闭包
             // 目标项目集已存在
-            int newId = itemIds.get(newItem);
-            if (GrammarParser.isTerminal(next)) {
-                // 移入
-                LRTable.addShift(curId,next,newId);
-            }else {
-                // Goto
-//                System.out.println("转移已存在闭包："+newItem.prodState()+" when "+next+" "+curId+"-"+newId);
-                LRTable.addGoto(curId,next,newId);
-            }
+            nextItemSet.get(next).prim.add(newItem);
+//            if (GrammarParser.isTerminal(next)) {
+//                // 移入
+//                LRTable.addShift(curId,next,newId);
+//            }else {
+//                // Goto
+////                System.out.println("转移已存在闭包："+newItem.prodState()+" when "+next+" "+curId+"-"+newId);
+//                LRTable.addGoto(curId,next,newId);
+//            }
         }else {
             // 产生新项目集
             int newId = maxId++;
             ItemSet newSet = new ItemSet(newId, newItem.production, newItem.next, newItem.look);
-            itemIds.put(newItem, newId);
+//            itemIds.put(newItem, newId);
             // 转移到新项目
+            nextItemSet.put(next, newSet);
             if (GrammarParser.isTerminal(next)) {
                 // 移入
                 LRTable.addShift(curId,next,newId);
@@ -129,9 +166,35 @@ public class ItemSet {
                 LRTable.addGoto(curId,next,newId);
             }
             // 递归产生
-            generate(newSet);
+//            generate(newSet);
         }
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((prim == null) ? 0 : prim.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ItemSet other = (ItemSet) obj;
+        if (prim == null) {
+            if (other.prim != null)
+                return false;
+        } else if (!prim.equals(other.prim))
+            return false;
+        return true;
+    }
+
     
 
 }
