@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -17,53 +18,78 @@ import java.util.Set;
 public class ItemSet {
     private static Map<ItemSet, Integer> itemSetIds = new HashMap<>();
     private static Queue<ItemSet> queue = new LinkedList<>();
-    static int maxId=0; // 新项目集序号
-    
+    static int maxId = 0; // 新项目集序号
+
     /** 项目集标记属性 */
-    
-    private final int id;
+    private int id;
     private final Set<Item> prim = new HashSet<>();
-    /** 记录相同项目 */
+
+    /** 记录相同项目，以合并look集合  */
     private Map<String, Item> prodStates = new LinkedHashMap<>();
+    /** 产生闭包时，已遍历的Item */
+    private Set<Item> visitedItem = new HashSet<>();
+    /** 当前ItemSet所能推出的ItemSet */
     private Map<String, ItemSet> nextItemSet = new LinkedHashMap<>();
-    
-    public ItemSet(int id,Item item) {
-        super();
-        this.id = id;
+
+    public ItemSet(Item item) {
         this.prim.add(item);
     }
-    
-    public ItemSet(int id,Production production, int next, Set<String> look) {
-        super();
-        this.id = id;
+
+    public ItemSet(Production production, int next, Set<String> look) {
         this.prim.add(new Item(production, next, look));
     }
-    
+
     public static void startGenerateClosure(Production start) {
-        ItemSet first = new ItemSet(maxId++, start, 0, new HashSet<>(Arrays.asList("#")));
+        ItemSet first = new ItemSet(start, 0, new HashSet<>(Arrays.asList("#")));
+        first.id = maxId++;
         itemSetIds.put(first, first.id);
-        generate(first);
+
+//        // first 产生闭包
+//        first.generate();
+        // first 入队
         queue.add(first);
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             ItemSet top = queue.poll();
+            top.generate();
             top.generateClosure();
-            if (top.nextItemSet.size()==0) {
-                // 规约 TODO
-                continue;
-            }
             for (String string : top.nextItemSet.keySet()) {
-                ItemSet nextSet = top.nextItemSet.get(start);
+                ItemSet nextSet = top.nextItemSet.get(string);
                 if (itemSetIds.containsKey(nextSet)) {
-                    // prim 已存在 跳转 TODO
-                }else {
-                    // 新集，生成闭包，入队
+                    // prim 已存在 跳转
+                    if (GrammarParser.isTerminal(string)) {
+                        LRTable.addShift(top.id, string, itemSetIds.get(nextSet));
+                    } else {
+                        LRTable.addGoto(top.id, string, itemSetIds.get(nextSet));
+                    }
+                } else {
+                    // 新集，生成闭包，入队，跳转
+                    nextSet.id = maxId++;
+                    itemSetIds.put(nextSet, nextSet.id);
+                    queue.add(nextSet);
+                    if (GrammarParser.isTerminal(string)) {
+                        LRTable.addShift(top.id, string, nextSet.id);
+                    } else {
+                        LRTable.addGoto(top.id, string, nextSet.id);
+                    }
+//                    nextSet.generate();
                 }
-                
             }
-            
         }
     }
     
+    public static void showItemSet(ItemSet itemSet) {
+        System.out.println("    ItemSet : "+itemSet.id);
+        System.out.println("        prim:");
+        for (Item item : itemSet.prim) {
+            System.out.println("    "+item.prodState()+" "+item.look);
+        }
+        System.out.println("        generate:");
+        for (Item item : itemSet.prodStates.values()) {
+            System.out.println("    "+item.prodState()+" "+item.look);
+        }
+        System.out.println();
+    }
+
     /**************
      * 算法
      * 1. 产生闭包
@@ -74,101 +100,90 @@ public class ItemSet {
      * 2.2 对新项目，若已存在，则直接转移
      * 2.3 对新项目，若不存在，则新建项目集，并从1开始
      **************/
-    
-    private static void generate(ItemSet thisSet) {
+
+    private void generate() {
         // 遍历prim集，产生项目
-        for (Item item : thisSet.prim) {
-            if (item.production.right.size()==item.next) {
-                // 规约项目，在generateItemSets中处理
-//                LRTable.addReg(thisSet.id,item.production,item.look);
-                return;
-            }
-            // 产生项目集
-            thisSet.generateItems(item);
-        }
-    }
-    
-    private void generateClosure() {
-        // Prim项目
         for (Item item : prim) {
-            generateItemSets(item,id);
+            if (item.production.right.size() == item.next) {
+                // 规约项目
+                LRTable.addReg(id, item.production, item.look);
+                continue;
+            }
+            // 产生项目闭包
+            generateItems(item);
         }
-        // 其他项目
-        for (Item item : prodStates.values()) {
-            generateItemSets(item,id);
-        }
+//        showItemSet(this);
     }
-    
+
     /**
      * 在当前项目内，计算闭包
-     * 由Prim或Prim所产生项目调用，仅在当前对象内递归，计算闭包
+     * 由Prim直接调用或Prim所产生项目递归调用，仅在当前对象内递归，计算闭包
      * @param curItem 产生闭包的项目
      */
     private void generateItems(Item curItem) {
-//    	System.out.println("计算闭包："+curItem.prodState());
+        if (visitedItem.contains(curItem)) {
+            return;
+        }
+        visitedItem.add(curItem);
+        // System.out.println("计算闭包："+curItem.prodState());
         String next = curItem.getNext();
-        if (next==null) { // 闭包内 空产生式 规约项目
+        if (next == null) { // 闭包内 空产生式 规约项目
             LRTable.addReg(this.id, curItem.production, curItem.look);
-			return;
-		}
+            return;
+        }
         if (GrammarParser.isTerminal(next)) { // 移入项目,产生项目集时处理
-			return;
-		}
+            return;
+        }
         // 产生项目集内项目
         List<Production> productions = GrammarParser.productions.get(next);
-        Set<String> curLook = curItem.getLook(); // 继承展望符
+        Set<String> curLook = new HashSet<>();
+        curLook.addAll(curItem.inhLook()); // 继承展望符
         for (Production production : productions) {
-            Item item = new Item(   production, 0, curLook);
-            if (this.prodStates.keySet().contains(item.prodState())) {
+            Item item = new Item(production, 0, curLook);
+            if (prodStates.keySet().contains(item.prodState())) {
                 // 项目已存在，合并look
-                this.prodStates.get(item.prodState()).look.addAll(curLook);
-                continue;
+                prodStates.get(item.prodState()).look.addAll(curLook);
+            }else {
+                // 新项目
+                prodStates.put(item.prodState(), item);
             }
-            // 新项目
-            this.prodStates.put(item.prodState(), item);
             // 递归添加新项目可产生的所有项目
-            this.generateItems(item);
-		}
+            generateItems(item);
+        }
     }
-    
-    private void generateItemSets(Item curItem,int curId) {
+
+    /**
+     * 遍历当前项目集项目
+     * 调用generateItemSets 产生 nextItemSet
+     */
+    private void generateClosure() {
+        for (Item item : prim) {
+            generateItemSets(item, id);
+        }
+        for (Item item : prodStates.values()) {
+            generateItemSets(item, id);
+        }
+    }
+
+    private void generateItemSets(Item curItem, int curId) {
         String next = curItem.getNext();
-        if (next==null) { // 规约项目 
-            LRTable.addReg(curId,curItem.production,curItem.look);
-			return;
-		}
-        Item newItem = new Item(curItem.production, curItem.next+1, curItem.look);
+        if (next == null) { // 规约项目
+            // LRTable.addReg(curId, curItem.production, curItem.look);
+            return;
+        }
+        Item newItem = new Item(curItem.production, curItem.next + 1, curItem.look);
         // 项目集转移
         if (nextItemSet.containsKey(next)) { // 根据转移符标志闭包
             // 目标项目集已存在
             nextItemSet.get(next).prim.add(newItem);
-//            if (GrammarParser.isTerminal(next)) {
-//                // 移入
-//                LRTable.addShift(curId,next,newId);
-//            }else {
-//                // Goto
-////                System.out.println("转移已存在闭包："+newItem.prodState()+" when "+next+" "+curId+"-"+newId);
-//                LRTable.addGoto(curId,next,newId);
-//            }
-        }else {
+        } else {
             // 产生新项目集
-            int newId = maxId++;
-            ItemSet newSet = new ItemSet(newId, newItem.production, newItem.next, newItem.look);
-//            itemIds.put(newItem, newId);
-            // 转移到新项目
+            ItemSet newSet = new ItemSet(newItem.production, newItem.next, newItem.look);
             nextItemSet.put(next, newSet);
-            if (GrammarParser.isTerminal(next)) {
-                // 移入
-                LRTable.addShift(curId,next,newId);
-            }else {
-                // Goto
-//                System.out.println("转移新闭包:"+newItem.prodState()+" when "+next+" "+curId+"-"+newId);
-                LRTable.addGoto(curId,next,newId);
-            }
-            // 递归产生
-//            generate(newSet);
         }
     }
+
+
 
     @Override
     public int hashCode() {
@@ -195,53 +210,57 @@ public class ItemSet {
         return true;
     }
 
-    
+
 
 }
 
-class Item{
+
+class Item {
     final Production production;
     final int next;
     Set<String> look;
-    
+
     public Item(Production production, int next, Set<String> look) {
         super();
         this.production = production;
         this.next = next;
-        this.look = look;
+        this.look = new HashSet<>();
+        this.look.addAll(look);
     }
-    
+
     String getNext() {
-    	if (next<production.right.size()) {
-    		return production.right.get(next);
-		}else {
-			return null;
-		}
+        if (next < production.right.size()) {
+            return production.right.get(next);
+        } else {
+            return null;
+        }
     }
-    
-    Set<String> getLook() {
-    	if (production.right.size()<=next+1) { // next的下一个，末尾
-			return look;
-		}
-    	String follow = production.right.get(next+1);
-    	if (GrammarParser.isTerminal(follow)) { // 终结符
-			return new HashSet<>(Arrays.asList(follow));
-		}
-    	// 非终结符
-    	Set<String> first = GrammarParser.firstSet.get(follow);
-    	if (!first.contains("$")) { // 无空
+
+    Set<String> inhLook() {
+        Set<String> result = new HashSet<>();
+        if (production.right.size() <= next + 1) { // next的下一个，末尾
+            result.addAll(look);
+            return result;
+        }
+        String follow = production.right.get(next + 1);
+        if (GrammarParser.isTerminal(follow)) { // 终结符
+            result.add(follow);
+            return result;
+        }
+        // 非终结符
+        Set<String> first = GrammarParser.firstSet.get(follow);
+        if (!first.contains("$")) { // 无空
             return first;
         }
-    	// 含空产生式
-    	Set<String> result = new HashSet<>();
-    	result.addAll(look);
-    	result.addAll(first);
-    	result.remove("$");
-    	return result;
+        // 含空产生式
+        result.addAll(look);
+        result.addAll(first);
+        result.remove("$");
+        return result;
     }
-    
+
     String prodState() {
-        return production.toString()+next;
+        return production.toString() + next;
     }
 
     @Override
@@ -278,5 +297,5 @@ class Item{
         return true;
     }
 
-    
+
 }

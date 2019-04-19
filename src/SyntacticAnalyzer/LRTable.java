@@ -19,7 +19,7 @@ public class LRTable {
     
     public static void addShift(int src,String string,int target) {
         Action action = new Action(Shift, target);
-        System.out.println(src+" 记录移入S："+string+":"+action.toString());
+        System.out.println(src+" 移入："+string+":"+action.toString());
         if (table.keySet().contains(src)) {
             // 源状态已存在
             table.get(src).put(string, action);
@@ -32,7 +32,7 @@ public class LRTable {
     
     public static void addReg(int src,Production production,Set<String> strings) {
         Action action = new Action(Reg,production);
-        System.out.println(src+" 记录规约R："+strings+":"+action.toString());
+        System.out.println(src+" 规约："+strings+":"+action.toString());
         Map<String, Action> map = new HashMap<>();
         for (String string : strings) {
             map.put(string, action);
@@ -42,8 +42,8 @@ public class LRTable {
     
     public static void addGoto(int src, String string, int target) {
         Action action = new Action(Goto, target);
-        System.out.println(src+" 记录转移G："+string+":"+action.toString());
-        if (table.keySet().contains(src)) {
+        System.out.println(src+" 转移："+string+":"+action.toString());
+        if (table.keySet().contains(src) ){
             // 源状态已存在
             table.get(src).put(string, action);
             return;

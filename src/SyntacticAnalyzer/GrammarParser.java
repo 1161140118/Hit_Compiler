@@ -37,6 +37,10 @@ public class GrammarParser {
         setGrammerFromFile(filepath);
         // ¼ÆËã First ¼¯
         setFirstSet();
+//        System.out.println("First Set");
+//        for (String string : firstSet.keySet()) {
+//            System.out.println(string+" : "+firstSet.get(string));
+//        }
         // È¥³ý $
         dropEmpty();
     }
