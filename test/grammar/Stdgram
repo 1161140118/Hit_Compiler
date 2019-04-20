@@ -1,8 +1,8 @@
 # 格式： A -> B C D @a
-# Pros （多个）过程
-# Decs （多个）声明
-# Sens （多个）可执行语句
-# @a 优先级更高项目
+# Pros （多个）过程 P
+# Decs （多个）声明 D
+# Sens （多个）可执行语句 S
+# @a 优先级更高字符 a
 
 ####################
 
@@ -29,7 +29,7 @@ D -> T ID = E ;
 T -> Type Array
 
 ## 声明函数
-D -> func ID (Decs) P
+D -> func ID ( ) P 
 ## 声明结构体
 D -> struct ID { Decs }
 
@@ -84,3 +84,12 @@ B -> E == E
 B -> E != E
 B -> true
 B -> false
+
+#####################
+
+# 过程调用
+
+S -> call ID ( Es );
+Es -> E , Es
+Es -> E
+Es -> $

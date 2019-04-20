@@ -15,7 +15,7 @@ public class SynAnalyzerTest {
 //        new SynAnalyzer("test/code/assigncode","test/grammar/assigngram","test/result");
 //        new SynAnalyzer("test/code/arithcode","test/grammar/arithgram","test/result");
 //        new SynAnalyzer("test/code/ccode","test/grammar/cgram","test/result");
-        new SynAnalyzer("test/code/zhoucode","test/grammar/zhougram","test/result");
+        new SynAnalyzer("test/code/Stdcode","test/grammar/Stdgram","test/result");
         
     }
 
