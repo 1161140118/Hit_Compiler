@@ -28,7 +28,8 @@ public class LRTable {
         if (table.containsKey(src)) {
             // 源状态已存在
             if (table.get(src).containsKey(string)) {
-                System.err.println("Shift conflict.");
+                System.err.println("Shift conflict : "+src+" , "+string);
+                System.err.println(table.get(src).get(string)+"  <==  "+action);
             }
             table.get(src).put(string, action);
             return;
@@ -45,7 +46,8 @@ public class LRTable {
         for (String string : strings) {
             if (table.containsKey(src)) {
                 if (table.get(src).containsKey(string)) {
-                    System.err.println("Reduce conflict.");
+                    System.err.println("Reduce conflict : "+src+" , "+string);
+                    System.err.println(table.get(src).get(string)+"  <==  "+action);
                 }
             }
             map.put(string, action);
@@ -63,7 +65,8 @@ public class LRTable {
         if (table.keySet().contains(src) ){
             // 源状态已存在
             if (table.get(src).containsKey(string)) {
-                System.err.println("Goto conflict.");
+                System.err.println("Goto conflict : "+src+" , "+string);
+                System.err.println(table.get(src).get(string)+"  <==  "+action);
             }
             table.get(src).put(string, action);
             return;
