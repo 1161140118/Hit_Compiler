@@ -101,7 +101,7 @@ public class ItemSet {
         for (Item item : prim) {
             if (item.production.right.size() == item.next) {
                 // 规约项目
-                LRTable.addReg(id, item.production, item.look);
+                LRTable.addRed(id, item.production, item.look);
                 continue;
             }
             // 产生项目闭包
@@ -123,7 +123,7 @@ public class ItemSet {
         // System.out.println("计算闭包："+curItem.prodState());
         String next = curItem.getNext();
         if (next == null) { // 闭包内 空产生式 规约项目
-            LRTable.addReg(this.id, curItem.production, curItem.look);
+            LRTable.addRed(this.id, curItem.production, curItem.look);
             return;
         }
         if (GrammarParser.isTerminal(next)) { // 移入项目,产生项目集时处理

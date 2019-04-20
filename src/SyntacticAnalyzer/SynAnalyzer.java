@@ -53,7 +53,7 @@ public class SynAnalyzer {
                     System.out.println(curState + " : " + action.toString());
                     break;
 
-                case LRTable.Reg:
+                case LRTable.Red:
                     // pop
                     for (int i = 0; i < action.production.right.size(); i++) {
                         symbolStack.pop();

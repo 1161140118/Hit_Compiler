@@ -18,15 +18,18 @@ import java.util.Set;
  */
 public class LRTable {
     public static final int Shift=1;
-    public static final int Reg=2;
+    public static final int Red=2;
     public static final int Goto=3;
     static Map<Integer, Map<String,Action>> table = new HashMap<>();
     
     public static void addShift(int src,String string,int target) {
         Action action = new Action(Shift, target);
         System.out.println(src+" 移入："+string+":"+action.toString());
-        if (table.keySet().contains(src)) {
+        if (table.containsKey(src)) {
             // 源状态已存在
+            if (table.get(src).containsKey(string)) {
+                System.err.println("Shift conflict.");
+            }
             table.get(src).put(string, action);
             return;
         }
@@ -35,14 +38,23 @@ public class LRTable {
         table.put(src, map);
     }
     
-    public static void addReg(int src,Production production,Set<String> strings) {
-        Action action = new Action(Reg,production);
+    public static void addRed(int src,Production production,Set<String> strings) {
+        Action action = new Action(Red,production);
         System.out.println(src+" 规约："+strings+":"+action.toString());
         Map<String, Action> map = new HashMap<>();
         for (String string : strings) {
+            if (table.containsKey(src)) {
+                if (table.get(src).containsKey(string)) {
+                    System.err.println("Reduce conflict.");
+                }
+            }
             map.put(string, action);
         }
-        table.put(src, map);
+        if (table.containsKey(src)) {
+            table.get(src).putAll(map);
+        }else {
+            table.put(src, map);
+        }
     }
     
     public static void addGoto(int src, String string, int target) {
@@ -50,6 +62,9 @@ public class LRTable {
         System.out.println(src+" 转移："+string+":"+action.toString());
         if (table.keySet().contains(src) ){
             // 源状态已存在
+            if (table.get(src).containsKey(string)) {
+                System.err.println("Goto conflict.");
+            }
             table.get(src).put(string, action);
             return;
         }

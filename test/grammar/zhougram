@@ -9,17 +9,15 @@
 
 P' -> P
 P -> D S
-#D -> D D
-#S -> S S
+D -> D D'
+D' -> D
+S -> S S
 
 #####################
 
 # 声明语句
 
 D -> Dv
-D -> proc ID { D S }
-D -> record ID Dv end
-Dv -> Dv Dv
 Dv -> T ID ;
 T -> Type C
 
@@ -36,20 +34,19 @@ C -> $
 
 # 赋值语句
 
-S -> id = E ;
+S -> ID = E ;
 S -> L = E ;
 
-## 算数表达式
 E -> E + T
 E -> T
 T -> T * F
 T -> F
 F -> ( E )
-E -> id
+E -> ID
 E -> const
 E -> L
 
-L -> id [ E ]
+L -> ID [ E ]
 L -> L [ E ]
 
 const -> INT
@@ -61,29 +58,3 @@ const -> STR
 
 # 控制语句
 # B表示布尔表达式
-
-S -> if B then S end
-S -> if B then S else S end
-S -> while B do S end
-
-B -> B || B
-B -> B && B
-B -> ! B
-B -> ( B )
-
-B -> E < E
-B -> E <= E
-B -> E > E
-B -> E >= E
-B -> E == E
-B -> E != E
-
-B -> true
-B -> false
-
-#####################
-
-# 函数调用语句
-#S -> call id ( Elist ) ;
-#Elist -> Elist , E
-#Elist -> E
