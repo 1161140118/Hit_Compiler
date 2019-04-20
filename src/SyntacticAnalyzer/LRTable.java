@@ -122,13 +122,13 @@ class Action {
         String act = "";
         switch (type) {
             case 1:
-                act = "S" + target;
+                act = "Shift " + target;
                 break;
             case 3:
-                act = "" + target;
+                act = "Goto " + target;
                 break;
             case 2:
-                act = "R " + production.toString();
+                act = "Reduce " + production.toString();
                 break;
             default:
                 break;

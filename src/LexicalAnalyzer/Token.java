@@ -31,7 +31,7 @@ public class Token {
     private int intValue = -1;
     private double douValue = -1;
     private String strValue = "";
-    private int line; // 对应源程序行号
+    public final int line; // 对应源程序行号
 
 
     public Token(int classid, int intValue, int line) {
@@ -161,7 +161,7 @@ public class Token {
                     line = token.line;
                     writer.write("\n");
                 }
-                System.out.print(token);
+//                System.out.print(token);
                 writer.write(token.toString());
             }
             writer.flush();

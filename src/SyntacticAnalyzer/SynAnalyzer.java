@@ -40,9 +40,20 @@ public class SynAnalyzer {
         System.out.println("\n Syntax Analysis Begin.");
         int curState = stateStack.peek();
         String token = getToken();
+        Action action;
         while (true) {
             curState = stateStack.peek();
-            Action action = LRTable.table.get(curState).get(token); // 根据输入字符判断动作
+            action = LRTable.table.get(curState).get(token); // 根据输入字符判断动作
+            while (action==null) {
+                int num = getLineNum();
+                if (num==-1) {
+                    System.err.println("SynAnalyzer Failed!");
+                    return;
+                }
+                System.err.println("Error at Line ["+num+"]: "+"Unexpected symbol '"+token+"'. Expect :"+LRTable.table.get(curState).keySet());
+                token = getToken();
+                action = LRTable.table.get(curState).get(token);
+            }
             switch (action.type) {
                 case LRTable.Shift:
                     // 符号入栈
@@ -64,7 +75,7 @@ public class SynAnalyzer {
                     
                     if (symbolStack.peek().equals(GrammarParser.startSymbol)) {
                         // 规约出开始符号
-                        System.out.println("SynAnalyzer Successfully Complete.");
+                        System.out.println("SynAnalysis Successfully Complete.");
                         return;
                     }
                     // 进行GOTO
@@ -113,12 +124,19 @@ public class SynAnalyzer {
         }
     }
 
-    public String getToken() {
+    private String getToken() {
         if (tokenIndex == tokens.size()) {
             return "#";
         }
         int id = tokens.get(tokenIndex++).getClassid();
         return tokenTable.get(id);
+    }
+    
+    private int getLineNum() {
+        if (tokenIndex == tokens.size()) {
+            return -1;
+        }
+        return tokens.get(tokenIndex).line;
     }
 
 
