@@ -14,8 +14,8 @@ int
 char
 float
 void
-record
-proc
+struct
+func
 call
 +
 ++

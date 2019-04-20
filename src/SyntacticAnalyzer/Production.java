@@ -1,7 +1,9 @@
 package SyntacticAnalyzer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,6 +12,7 @@ public class Production {
 	
 	public final String left;
 	public final List<String> right = new ArrayList<>();
+	public final Set<String> priority = new HashSet<>();
 	
 	
 	public Production(String line) {
@@ -28,7 +31,12 @@ public class Production {
 			}
 		}
 		while(matcher.find()) {
-			right.add(matcher.group(1));
+		    String word = matcher.group(1);
+		    if (word.charAt(0) == '@') {
+		        priority.add(word.substring(1));
+            }else {
+                right.add(matcher.group(1));
+            }
 		}
 		
 	}
@@ -71,11 +79,5 @@ public class Production {
     public String toString() {
         return left + " -> " + right;
     }
-    
-    public static void main(String[] args) {
-        int id = 1;
-        System.out.println(id++);
-        System.out.println(id);
-    }
-	
+
 }

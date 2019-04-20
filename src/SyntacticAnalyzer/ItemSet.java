@@ -58,7 +58,7 @@ public class ItemSet {
                         LRTable.addGoto(top.id, string, itemSetIds.get(nextSet));
                     }
                 } else {
-                    // 新集，生成闭包，入队，跳转
+                    // 新集，入队，跳转
                     nextSet.id = maxId++;
                     itemSetIds.put(nextSet, nextSet.id);
                     queue.add(nextSet);
@@ -101,7 +101,11 @@ public class ItemSet {
         for (Item item : prim) {
             if (item.production.right.size() == item.next) {
                 // 规约项目
-                LRTable.addRed(id, item.production, item.look);
+                // 根据优先级，消除二义性
+                Set<String> redset = new HashSet<>();
+                redset.addAll(item.look);
+                redset.removeAll(item.production.priority);
+                LRTable.addRed(id, item.production, redset);
                 continue;
             }
             // 产生项目闭包

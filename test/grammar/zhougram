@@ -1,18 +1,23 @@
-# 格式： A -> B C D
-# P 过程
-# D 声明
-# S 可执行语句
+# 格式： A -> B C D @a
+# Pros （多个）过程
+# Decs （多个）声明
+# Sens （多个）可执行语句
+# @a 优先级更高项目
 
 ####################
 
-# 初始
+# 综合
 
-P' -> P
-P -> { Dec Sen }
-Dec -> D Dec
-Dec -> D
-Sen -> S Sen
-Sen -> S
+P' -> Decs Pros
+Pros -> P Pros
+Pros -> P
+P -> { Decs Sens }
+Decs -> D Decs
+Decs -> D
+Decs -> $
+Sens -> S Sens
+Sens -> S
+Sens -> $
 
 
 #####################
@@ -20,7 +25,13 @@ Sen -> S
 # 声明语句
 
 D -> T ID ;
-T -> Type C
+D -> T ID = E ;
+T -> Type Array
+
+## 声明函数
+D -> func ID (Decs) P
+## 声明结构体
+D -> struct ID { Decs }
 
 Type -> int
 Type -> char
@@ -28,8 +39,8 @@ Type -> float
 Type -> void
 
 ## 数组下标
-C -> [ INT ] C
-C -> $
+Array -> [ INT ] Array
+Array -> $
 
 #####################
 
@@ -38,34 +49,32 @@ C -> $
 S -> ID = E ;
 S -> L = E ;
 
-E -> E + T
-E -> T
-T -> T * F
-T -> F
-F -> ( E )
+E -> E + E  @*
+E -> E * E
+E -> ( E )
 E -> ID
-E -> const
+E -> Const
 E -> L
 
 L -> ID [ E ]
 L -> L [ E ]
 
-const -> INT
-const -> FLOAT
-const -> BOOL
-const -> STR
+Const -> INT
+Const -> FLOAT
+Const -> BOOL
+Const -> STR
 
 #####################
 
 # 控制语句
-# B表示布尔表达式
+# B 布尔表达式
 
-S -> if B then S end
-S -> if B then S else S end
-S -> while B do S end
-B -> B or B 
-B -> B and B 
-B -> not B
+S -> if B P             @else     
+S -> if B P else P
+S -> while B P
+B -> B || B     @! @&&
+B -> B && B     @!
+B -> ! B
 B -> ( B )
 B -> E < E
 B -> E <= E
