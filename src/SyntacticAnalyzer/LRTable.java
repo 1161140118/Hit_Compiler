@@ -30,6 +30,7 @@ public class LRTable {
             if (table.get(src).containsKey(string)) {
                 System.err.println("Shift conflict : "+src+" , "+string);
                 System.err.println(table.get(src).get(string)+"  <==  "+action);
+                System.err.println("ÒÑºöÂÔÒÆÈë.");
             }
             table.get(src).put(string, action);
             return;

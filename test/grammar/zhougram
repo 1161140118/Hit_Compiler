@@ -8,17 +8,18 @@
 # 初始
 
 P' -> P
-P -> D S
-D -> D D'
-D' -> D
-S -> S S
+P -> { Dec Sen }
+Dec -> D Dec
+Dec -> D
+Sen -> S Sen
+Sen -> S
+
 
 #####################
 
 # 声明语句
 
-D -> Dv
-Dv -> T ID ;
+D -> T ID ;
 T -> Type C
 
 Type -> int
@@ -58,3 +59,19 @@ const -> STR
 
 # 控制语句
 # B表示布尔表达式
+
+S -> if B then S end
+S -> if B then S else S end
+S -> while B do S end
+B -> B or B 
+B -> B and B 
+B -> not B
+B -> ( B )
+B -> E < E
+B -> E <= E
+B -> E > E
+B -> E >= E
+B -> E == E
+B -> E != E
+B -> true
+B -> false
