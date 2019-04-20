@@ -1,0 +1,89 @@
+# 格式： A -> B C D
+# P 过程
+# D 声明
+# S 可执行语句
+
+####################
+
+# 初始
+
+P' -> P
+P -> D S
+#D -> D D
+#S -> S S
+
+#####################
+
+# 声明语句
+
+D -> Dv
+D -> proc ID { D S }
+D -> record ID Dv end
+Dv -> Dv Dv
+Dv -> T ID ;
+T -> Type C
+
+Type -> int
+Type -> char
+Type -> float
+Type -> void
+
+## 数组下标
+C -> [ INT ] C
+C -> $
+
+#####################
+
+# 赋值语句
+
+S -> id = E ;
+S -> L = E ;
+
+## 算数表达式
+E -> E + T
+E -> T
+T -> T * F
+T -> F
+F -> ( E )
+E -> id
+E -> const
+E -> L
+
+L -> id [ E ]
+L -> L [ E ]
+
+const -> INT
+const -> FLOAT
+const -> BOOL
+const -> STR
+
+#####################
+
+# 控制语句
+# B表示布尔表达式
+
+S -> if B then S end
+S -> if B then S else S end
+S -> while B do S end
+
+B -> B || B
+B -> B && B
+B -> ! B
+B -> ( B )
+
+B -> E < E
+B -> E <= E
+B -> E > E
+B -> E >= E
+B -> E == E
+B -> E != E
+
+B -> true
+B -> false
+
+#####################
+
+# 函数调用语句
+#S -> call id ( Elist ) ;
+#Elist -> Elist , E
+#Elist -> E
