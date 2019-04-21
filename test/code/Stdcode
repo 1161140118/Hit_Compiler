@@ -5,9 +5,13 @@ struct str1 {
 }
 
 struct str2 {
-    float next2 char;
+    float next2;
 }
 
+func f1(){
+    char next3;
+    next3 = "a";
+}
 
 
 {
@@ -26,6 +30,8 @@ struct str2 {
     else{
         p = 6;
     }
+    
+    call f1( );
 
 }
 

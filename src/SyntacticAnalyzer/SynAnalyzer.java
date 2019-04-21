@@ -3,11 +3,16 @@
  */
 package SyntacticAnalyzer;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import LexicalAnalyzer.LexAnalyzer;
 import LexicalAnalyzer.Token;
+import graphviz.DrawTree;
+import graphviz.GraphViz;
 
 /**
  * @author standingby
@@ -22,8 +27,11 @@ public class SynAnalyzer {
 
     private Stack<Integer> stateStack;
     private Stack<String> symbolStack;
+    /** 异常处理 */
+    private Set<String> recover = new HashSet<>(Arrays.asList("D","S","Decs","Sens","{"));
 
-
+    private DrawTree draw;
+    
     public SynAnalyzer() {
     }
     
@@ -33,7 +41,9 @@ public class SynAnalyzer {
         LexAnalyzer.startLexicalAnalyzer(sourceCode, lexicaloutput);
         initLexicalMessage();
         initStack();
+        draw = new DrawTree();
         processer();
+        draw.draw();
     }
 
     private void processer() {
@@ -44,6 +54,8 @@ public class SynAnalyzer {
         while (true) {
             curState = stateStack.peek();
             action = LRTable.table.get(curState).get(token); // 根据输入字符判断动作
+            
+            // 错误处理
             while (action==null) {
                 int num = getLineNum();
                 if (num==-1) {
@@ -51,9 +63,21 @@ public class SynAnalyzer {
                     return;
                 }
                 System.err.println("Error at Line ["+num+"]: "+"Unexpected symbol '"+token+"'. Expect :"+LRTable.table.get(curState).keySet());
+                // 弹出，直到预定义非终结符 
+                while( ! recover.contains(symbolStack.peek())) {
+                    symbolStack.pop();
+                    stateStack.pop();
+                }
+                curState = stateStack.peek();
+                token = getToken();
+                while(!(token.equals(";")||token.equals("}"))) {
+                    token = getToken();
+                }
                 token = getToken();
                 action = LRTable.table.get(curState).get(token);
             }
+            
+            // 处理
             switch (action.type) {
                 case LRTable.Shift:
                     // 符号入栈
@@ -72,7 +96,7 @@ public class SynAnalyzer {
                     }
                     symbolStack.push(action.production.left);
                     System.out.println(curState + " : " + action.toString());
-                    
+                    draw.addProduction(action.production);
                     if (symbolStack.peek().equals(GrammarParser.startSymbol)) {
                         // 规约出开始符号
                         System.out.println("SynAnalysis Successfully Complete.");
@@ -88,7 +112,7 @@ public class SynAnalyzer {
                     }
                     stateStack.push(action.target);
                     System.out.println(curState + " : " + action.toString());
-
+                    
                     break; 
                 default:
                     break;

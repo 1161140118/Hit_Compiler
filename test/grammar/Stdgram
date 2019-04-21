@@ -12,12 +12,12 @@ P' -> Decs Pros
 Pros -> P Pros
 Pros -> P
 P -> { Decs Sens }
+P -> { Decs }
+P -> { Sens }
 Decs -> D Decs
 Decs -> D
-Decs -> $
 Sens -> S Sens
 Sens -> S
-Sens -> $
 
 
 #####################
@@ -29,9 +29,11 @@ D -> T ID = E ;
 T -> Type Array
 
 ## 声明函数
-D -> func ID ( ) P 
+P -> func ID ( ) { Decs }
+P -> func ID ( ) { Sens }
+P -> func ID ( ) { Decs Sens }   
 ## 声明结构体
-D -> struct ID { Decs }
+D -> struct ID { D }
 
 Type -> int
 Type -> char
@@ -89,7 +91,7 @@ B -> false
 
 # 过程调用
 
-S -> call ID ( Es );
+S -> call ID ( Es ) ;
 Es -> E , Es
 Es -> E
 Es -> $
