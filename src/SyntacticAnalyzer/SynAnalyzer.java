@@ -12,7 +12,6 @@ import java.util.Stack;
 import LexicalAnalyzer.LexAnalyzer;
 import LexicalAnalyzer.Token;
 import graphviz.DrawTree;
-import graphviz.GraphViz;
 
 /**
  * @author standingby
@@ -107,9 +106,6 @@ public class SynAnalyzer {
                 case LRTable.Goto:
                     curState = stateStack.peek();
                     action = LRTable.table.get(curState).get(symbolStack.peek());
-                    if (action == null) {
-                        // TODO
-                    }
                     stateStack.push(action.target);
                     System.out.println(curState + " : " + action.toString());
                     
