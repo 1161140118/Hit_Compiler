@@ -24,7 +24,7 @@ public class DrawTree {
     public void addProduction(Production production) {
         String lift = production.left;
         for (String string : production.right) {
-            graph.addln(lift+"->"+string+";");
+            graph.addln("\""+lift+"\"->\""+string+"\"");
         }
     }
     

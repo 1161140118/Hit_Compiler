@@ -84,7 +84,7 @@ public class SynAnalyzer {
                     // ÷∏’Î«∞“∆
                     token = getToken();
                     stateStack.push(action.target);
-                    System.out.println(curState + " : " + action.toString());
+//                    System.out.println(curState + " : " + action.toString());
                     break;
 
                 case LRTable.Red:
@@ -107,7 +107,7 @@ public class SynAnalyzer {
                     curState = stateStack.peek();
                     action = LRTable.table.get(curState).get(symbolStack.peek());
                     stateStack.push(action.target);
-                    System.out.println(curState + " : " + action.toString());
+//                    System.out.println(curState + " : " + action.toString());
                     
                     break; 
                 default:

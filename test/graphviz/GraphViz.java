@@ -61,6 +61,7 @@ public class GraphViz {
      */
     public void addln(String line) {
         graph.append(line + "\n");
+        System.err.println("add branch: " + line);
     }
 
     /**
