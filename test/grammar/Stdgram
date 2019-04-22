@@ -11,6 +11,7 @@
 P' -> Decs Pros
 Pros -> P Pros
 Pros -> P
+Pros -> $
 P -> { Decs Sens }
 P -> { Decs }
 P -> { Sens }

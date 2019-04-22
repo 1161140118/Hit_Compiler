@@ -16,6 +16,7 @@ public class SynAnalyzerTest {
 //        new SynAnalyzer("test/code/arithcode","test/grammar/arithgram","test/result");
 //        new SynAnalyzer("test/code/ccode","test/grammar/cgram","test/result");
         new SynAnalyzer("test/code/Stdcode","test/grammar/Stdgram","test/result");
+//        new SynAnalyzer("test/code/treetest","test/grammar/Stdgram","test/result");
         
     }
 

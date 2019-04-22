@@ -27,20 +27,19 @@ public class SynAnalyzer {
     private Stack<Integer> stateStack;
     private Stack<String> symbolStack;
     /** 异常处理 */
-    private Set<String> recover = new HashSet<>(Arrays.asList("D","S","Decs","Sens","{"));
+    private Set<String> recover = new HashSet<>(Arrays.asList("D", "S", "Decs", "Sens", "{"));
 
     private DrawTree draw;
-    
-    public SynAnalyzer() {
-    }
-    
-    public SynAnalyzer(String sourceCode,String grammarPath,String lexicaloutput) {
+
+    public SynAnalyzer() {}
+
+    public SynAnalyzer(String sourceCode, String grammarPath, String lexicaloutput) {
         initTable(grammarPath);
-        LRTable.output(lexicaloutput+"/table");
+        LRTable.output(lexicaloutput + "/table");
         LexAnalyzer.startLexicalAnalyzer(sourceCode, lexicaloutput);
         initLexicalMessage();
         initStack();
-        draw = new DrawTree();
+        draw = new DrawTree(GrammarParser.terminals, GrammarParser.nonTerminals);
         processer();
         draw.draw();
     }
@@ -53,38 +52,40 @@ public class SynAnalyzer {
         while (true) {
             curState = stateStack.peek();
             action = LRTable.table.get(curState).get(token); // 根据输入字符判断动作
-            
+
             // 错误处理
-            while (action==null) {
+            while (action == null) {
                 int num = getLineNum();
-                if (num==-1) {
+                if (num == -1) {
                     System.err.println("SynAnalyzer Failed!");
                     return;
                 }
-                System.err.println("Error at Line ["+num+"]: "+"Unexpected symbol '"+token+"'. Expect :"+LRTable.table.get(curState).keySet());
-                // 弹出，直到预定义非终结符 
-                while( ! recover.contains(symbolStack.peek())) {
+                System.err.println("Error at Line [" + num + "]: " + "Unexpected symbol '" + token
+                        + "'. Expect :" + LRTable.table.get(curState).keySet());
+                // 弹出，直到预定义非终结符
+                while (!recover.contains(symbolStack.peek())) {
                     symbolStack.pop();
                     stateStack.pop();
                 }
                 curState = stateStack.peek();
                 token = getToken();
-                while(!(token.equals(";")||token.equals("}"))) {
+                while (!(token.equals(";") || token.equals("}"))) {
                     token = getToken();
                 }
                 token = getToken();
                 action = LRTable.table.get(curState).get(token);
             }
-            
+
             // 处理
             switch (action.type) {
                 case LRTable.Shift:
                     // 符号入栈
                     symbolStack.push(token);
+                    stateStack.push(action.target);
+                    System.out.println(curState + " : " + action.toString() + ":" + token);
+                    draw.addTerminals(token);
                     // 指针前移
                     token = getToken();
-                    stateStack.push(action.target);
-//                    System.out.println(curState + " : " + action.toString());
                     break;
 
                 case LRTable.Red:
@@ -107,9 +108,9 @@ public class SynAnalyzer {
                     curState = stateStack.peek();
                     action = LRTable.table.get(curState).get(symbolStack.peek());
                     stateStack.push(action.target);
-//                    System.out.println(curState + " : " + action.toString());
-                    
-                    break; 
+                    // System.out.println(curState + " : " + action.toString());
+
+                    break;
                 default:
                     break;
             }
@@ -138,7 +139,7 @@ public class SynAnalyzer {
         tokenTable = Token.getTokenTable();
         tokens = Token.getTokens();
         idList = Token.getIdList();
-        if (tokenTable == null || tokens == null || idList ==null) {
+        if (tokenTable == null || tokens == null || idList == null) {
             System.err.println("Failed to init lexical message!");
             System.exit(-1);
         }
@@ -151,7 +152,7 @@ public class SynAnalyzer {
         int id = tokens.get(tokenIndex++).getClassid();
         return tokenTable.get(id);
     }
-    
+
     private int getLineNum() {
         if (tokenIndex == tokens.size()) {
             return -1;

@@ -1,0 +1,3 @@
+struct str1 {
+    int next1;
+}
