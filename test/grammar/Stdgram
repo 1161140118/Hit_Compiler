@@ -17,6 +17,7 @@ P -> { Decs }
 P -> { Sens }
 Decs -> D Decs
 Decs -> D
+Decs -> $
 Sens -> S Sens
 Sens -> S
 
@@ -30,9 +31,13 @@ D -> T ID = E ;
 T -> Type Array
 
 ## 声明函数
-P -> func ID ( ) { Decs }
-P -> func ID ( ) { Sens }
-P -> func ID ( ) { Decs Sens }   
+P -> func ID ( Dlist ) { Decs }
+P -> func ID ( Dlist ) { Sens }
+P -> func ID ( Dlist ) { Decs Sens }
+Dlist -> D , Dlist
+Dlist -> D
+Dlist -> $   
+
 ## 声明结构体
 D -> struct ID { D }
 

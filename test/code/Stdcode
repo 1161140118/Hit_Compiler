@@ -8,7 +8,7 @@ struct str2 {
     float next2;
 }
 
-func f1(){
+func f1( int a; ){
     char next3;
     next3 = "a";
 }
@@ -31,7 +31,7 @@ func f1(){
         p = 6;
     }
     
-    call f1( );
+    call f1( a );
 
 }
 
