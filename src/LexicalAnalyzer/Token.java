@@ -27,7 +27,7 @@ public class Token {
     /** ¼ÇÂ¼token×Ö */
     private static List<Token> tokens = new LinkedList<>();
 
-    private int classid;
+    public final int classid;
     private int intValue = -1;
     private double douValue = -1;
     private String strValue = "";
@@ -53,6 +53,20 @@ public class Token {
         this.classid = classid;
         this.strValue = strValue;
         this.line = line;
+    }
+
+    
+    
+    public int getIntValue() {
+        return intValue;
+    }
+
+    public double getDouValue() {
+        return douValue;
+    }
+
+    public String getStrValue() {
+        return strValue;
     }
 
     @Override

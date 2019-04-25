@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.Stack;
 import LexicalAnalyzer.LexAnalyzer;
 import LexicalAnalyzer.Token;
+import SemanticAnalyzer.SemAnalyzer;
 import graphviz.DrawTree;
 
 /**
@@ -30,6 +31,7 @@ public class SynAnalyzer {
     private Set<String> recover = new HashSet<>(Arrays.asList("D", "S", "Decs", "Sens", "{"));
 
     private DrawTree draw;
+    private SemAnalyzer semAnalyzer;
 
     public SynAnalyzer() {}
 
@@ -40,6 +42,7 @@ public class SynAnalyzer {
         initLexicalMessage();
         initStack();
         draw = new DrawTree(GrammarParser.terminals, GrammarParser.nonTerminals);
+        semAnalyzer = new SemAnalyzer();
         processer();
         draw.draw();
     }
@@ -47,7 +50,7 @@ public class SynAnalyzer {
     private void processer() {
         System.out.println("\n Syntax Analysis Begin.");
         int curState = stateStack.peek();
-        String token = getToken();
+        String token = getTokenString();
         Action action;
         while (true) {
             curState = stateStack.peek();
@@ -68,11 +71,11 @@ public class SynAnalyzer {
                     stateStack.pop();
                 }
                 curState = stateStack.peek();
-                token = getToken();
+                token = getTokenString();
                 while (!(token.equals(";") || token.equals("}"))) {
-                    token = getToken();
+                    token = getTokenString();
                 }
-                token = getToken();
+                token = getTokenString();
                 action = LRTable.table.get(curState).get(token);
             }
 
@@ -84,8 +87,9 @@ public class SynAnalyzer {
                     stateStack.push(action.target);
                     System.out.println(curState + " : " + action.toString() + ":" + token);
                     draw.addTerminals(token);
+                    semAnalyzer.addShift(getCurToken());
                     // ÷∏’Î«∞“∆
-                    token = getToken();
+                    token = getTokenString();
                     break;
 
                 case LRTable.Red:
@@ -145,12 +149,16 @@ public class SynAnalyzer {
         }
     }
 
-    private String getToken() {
+    private String getTokenString() {
         if (tokenIndex == tokens.size()) {
             return "#";
         }
         int id = tokens.get(tokenIndex++).getClassid();
         return tokenTable.get(id);
+    }
+    
+    private Token getCurToken() {
+        return tokens.get(tokenIndex);
     }
 
     private int getLineNum() {

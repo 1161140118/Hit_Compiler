@@ -8,41 +8,60 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Production {
-	private static final Pattern PATTERN = Pattern.compile("(\\S+)");
-	
-	public final String left;
-	public final List<String> right = new ArrayList<>();
-	public final Set<String> priority = new HashSet<>();
-	
-	
-	public Production(String line) {
-		super();
-		Matcher matcher = PATTERN.matcher(line);
-		if (matcher.find()) {
-			this.left = matcher.group(1);
-		}else {
-			this.left=null;
-			System.err.println("Error: Illegal production.");
-		}
-		if (matcher.find()) {
-			if (!matcher.group(1).equals("->")) {
-				System.err.println("Error: Illegal production.");
-				return;
-			}
-		}
-		while(matcher.find()) {
-		    String word = matcher.group(1);
-		    if (word.charAt(0) == '@') {
-		        priority.add(word.substring(1));
-            }else {
-                right.add(matcher.group(1));
+    private static final Pattern PATTERN = Pattern.compile("(\\S+)");
+
+    public final String left;
+    public final List<String> right = new ArrayList<>();
+    public final Set<String> priority = new HashSet<>();
+    public String semAction;
+    public String semAttr;
+
+    public Production(String line) {
+        super();
+        Matcher matcher = PATTERN.matcher(line);
+        if (matcher.find()) {
+            this.left = matcher.group(1);
+        } else {
+            this.left = null;
+            System.err.println("Error: Illegal production :" + line);
+        }
+        if (matcher.find()) {
+            if (!matcher.group(1).equals("->")) {
+                System.err.println("Error: Illegal production :" + line);
+                return;
             }
-		}
-		
-	}
-	
-	
-	@Override
+        }
+        
+        while (matcher.find()) {
+            String word = matcher.group(1);
+            switch (word.charAt(0)) {
+                case '@':
+                    priority.add(word.substring(1));
+                    break;
+
+                case '\\':
+                    setSem(word);
+                    break;
+
+                default:
+                    right.add(matcher.group(1));
+                    break;
+            }
+        }
+
+
+    }
+    
+    private void setSem(String word) {
+        String[] sems = word.substring(1).split("@");
+        semAction = sems[0];
+        if (sems.length==2) {
+            semAttr = sems[1];
+        }
+    }
+
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

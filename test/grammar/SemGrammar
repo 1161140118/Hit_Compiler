@@ -1,0 +1,93 @@
+# 格式： A -> B C D @a \string@attr
+# Pros （多个）过程 P
+# Decs （多个）声明 D
+# Sens （多个）可执行语句 S
+# $ 空串
+# @a 优先级更高字符 a
+# \string@attr 记录语义动作 string 和辅助值 attr 
+
+####################
+
+# 综合
+
+P' -> Decs Pros
+Pros -> P Pros
+Pros -> P
+Pros -> $
+P -> { Decs Sens }
+P -> { Decs }
+P -> { Sens }
+Decs -> D Decs
+Decs -> D
+Decs -> $
+Sens -> S Sens
+Sens -> S
+
+
+#####################
+
+# 声明语句
+
+D -> Type ID ;      \declare
+
+## 声明函数
+P -> func ID ( Dlist ) MT { Decs }      \declare@func
+P -> func ID ( Dlist ) MT { Sens }      \declare@func
+P -> func ID ( Dlist ) MT { Decs Sens } \declare@func
+MT -> $     \mktable
+
+Dlist -> D , Dlist
+Dlist -> D
+Dlist -> $
+
+Type -> int     \typedefine@4
+Type -> char    \typedefine@1
+Type -> float   \typedefine@4
+
+#####################
+
+# 赋值语句
+
+S -> ID = E ;   \assign
+S -> L = E ;    \assign
+
+E -> E + E  @*  \expression@+
+E -> E * E      \expression@*
+E -> ( E )      \expression@combine
+E -> ID         \expression@id
+E -> Const      \expression@const
+
+Const -> INT
+Const -> FLOAT
+Const -> BOOL
+
+#####################
+
+# 控制语句
+# B 布尔表达式
+
+S -> if B P             @else       \if
+S -> if B P else P                  \ifelse
+S -> while B P          \while
+B -> B || B     @! @&&  \bool@||
+B -> B && B     @!      \bool@&&
+B -> ! B                \bool@!
+B -> ( B )              \bool@combine
+B -> E relop E      \relation
+relop -> <          \relop
+relop -> <=         \relop
+relop -> >          \relop
+relop -> >=         \relop
+relop -> ==         \relop
+relop -> !=         \relop
+B -> true
+B -> false
+
+#####################
+
+# 过程调用
+
+S -> call ID ( Elist ) ;    \call
+Elist -> E , Elist      
+Elist -> E
+Elist -> $
