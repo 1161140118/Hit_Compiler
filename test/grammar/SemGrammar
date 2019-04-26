@@ -14,9 +14,9 @@ P' -> Decs Pros
 Pros -> P Pros
 Pros -> P
 Pros -> $
-P -> { Decs Sens }
-P -> { Decs }
-P -> { Sens }
+P -> { Decs Sens }  \process
+P -> { Decs }       \process
+P -> { Sens }       \process
 Decs -> D Decs
 Decs -> D
 Decs -> $
@@ -31,10 +31,10 @@ Sens -> S
 D -> Type ID ;      \declare
 
 ## 声明函数
-P -> func ID ( Dlist ) MT { Decs }      \declareFunc
-P -> func ID ( Dlist ) MT { Sens }      \declareFunc
-P -> func ID ( Dlist ) MT { Decs Sens } \declareFunc
-MT -> $     \mktable
+P -> func ID MT ( Dlist ) { Decs }      \declareFunc
+P -> func ID MT ( Dlist ) { Sens }      \declareFunc
+P -> func ID MT ( Dlist ) { Decs Sens } \declareFunc
+MT -> $         \mktable
 
 Dlist -> D , Dlist
 Dlist -> D
@@ -53,7 +53,7 @@ S -> ID = E ;   \assign
 E -> E + E  @*  \expression@+
 E -> E * E      \expression@*
 E -> ( E )      \expression@combine
-E -> ID         \expression@id
+E -> ID         \expression@ida
 E -> Const      \expression@const
 
 Const -> INT
@@ -67,11 +67,13 @@ Const -> BOOL
 
 S -> if B P             @else       \if
 S -> if B P else P                  \ifelse
-S -> while B P          \while
-B -> B || B     @! @&&  \bool@||
-B -> B && B     @!      \bool@&&
+S -> while B P                      \while
+B -> B || BM B     @! @&&  \bool@||
+B -> B && BM B     @!      \bool@&&
+BM -> $                 \boolmark
 B -> ! B                \bool@!
 B -> ( B )              \bool@combine
+
 B -> E relop E      \relation
 relop -> <          \relop
 relop -> <=         \relop
@@ -79,8 +81,8 @@ relop -> >          \relop
 relop -> >=         \relop
 relop -> ==         \relop
 relop -> !=         \relop
-B -> true
-B -> false
+B -> true           \boolvalue
+B -> false          \boolvalue
 
 #####################
 

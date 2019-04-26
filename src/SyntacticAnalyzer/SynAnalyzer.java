@@ -45,7 +45,9 @@ public class SynAnalyzer {
         draw = new DrawTree(GrammarParser.terminals, GrammarParser.nonTerminals);
         semAnalyzer = new SemAnalyzer(new SymbolTable("Global"));
         processer();
+        SymbolTable.output();
         draw.draw();
+        
     }
 
     private void processer() {

@@ -30,6 +30,10 @@ public class Attribute {
         return attrs.get(key);
     }
     
+    public int getIntAttr(String key) {
+        return Integer.valueOf(getAttr(key));
+    }
+    
     public void putAttr(String key, String value) {
         attrs.put(key, value);
     }
