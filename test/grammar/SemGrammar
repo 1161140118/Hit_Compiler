@@ -49,7 +49,6 @@ Type -> float   \typedefine@4
 # 赋值语句
 
 S -> ID = E ;   \assign
-S -> L = E ;    \assign
 
 E -> E + E  @*  \expression@+
 E -> E * E      \expression@*

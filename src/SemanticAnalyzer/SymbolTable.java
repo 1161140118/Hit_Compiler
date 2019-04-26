@@ -13,10 +13,15 @@ import java.util.Set;
  *
  */
 public class SymbolTable {
-    public static int OFFSET = 0;
+    private int OFFSET = 0;
+    public final String proName;
     public List<Symbol> Table = new ArrayList<>();
     public Set<String> idStrings = new HashSet<>();
     public SymbolTable pre;
+    
+    public SymbolTable(String proName) {
+    	this.proName = proName;
+	}
     
     public void addSymbol(String name, String classId, String type, String offset) {
         Table.add(new Symbol(name, classId, type, OFFSET));
@@ -24,6 +29,15 @@ public class SymbolTable {
         OFFSET += Integer.valueOf(offset);
     }
     
+    public boolean hasDefine(String string) {
+    	if (idStrings.contains(string)) {
+			return true;
+		}
+    	if (pre==null) {
+			return false;
+		}
+    	return pre.hasDefine(string);
+    }
     
 }
 
@@ -53,8 +67,8 @@ class Symbol{
     /**
      * 
      */
-    public SymbolTable mktable(SymbolTable curTable) {
-        this.next = new SymbolTable();
+    public SymbolTable mktable(SymbolTable curTable,String proName) {
+        this.next = new SymbolTable(proName);
         this.next.pre = curTable;
         return next;
     }

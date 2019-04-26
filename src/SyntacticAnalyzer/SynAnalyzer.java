@@ -43,7 +43,7 @@ public class SynAnalyzer {
         initLexicalMessage();
         initStack();
         draw = new DrawTree(GrammarParser.terminals, GrammarParser.nonTerminals);
-        semAnalyzer = new SemAnalyzer(new SymbolTable());
+        semAnalyzer = new SemAnalyzer(new SymbolTable("Global"));
         processer();
         draw.draw();
     }
