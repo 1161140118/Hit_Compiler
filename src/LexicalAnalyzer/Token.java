@@ -55,7 +55,9 @@ public class Token {
         this.line = line;
     }
 
-    
+    public String getID() {
+        return idList.get(intValue);
+    }
     
     public int getIntValue() {
         return intValue;
@@ -133,6 +135,10 @@ public class Token {
     public static List<String> getIdList() {
         return idList;
     }
+    
+    /********************
+     *  输入 输出
+     ********************/
 
     /**
      * 初始化 token table

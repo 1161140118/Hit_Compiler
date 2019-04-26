@@ -1,14 +1,14 @@
-# ¸ñÊ½£º A -> B C D @a \string@attr
-# Pros £¨¶à¸ö£©¹ı³Ì P
-# Decs £¨¶à¸ö£©ÉùÃ÷ D
-# Sens £¨¶à¸ö£©¿ÉÖ´ĞĞÓï¾ä S
-# $ ¿Õ´®
-# @a ÓÅÏÈ¼¶¸ü¸ß×Ö·û a
-# \string@attr ¼ÇÂ¼ÓïÒå¶¯×÷ string ºÍ¸¨ÖúÖµ attr 
+# æ ¼å¼ï¼š A -> B C D @a \string@attr
+# Pros ï¼ˆå¤šä¸ªï¼‰è¿‡ç¨‹ P
+# Decs ï¼ˆå¤šä¸ªï¼‰å£°æ˜ D
+# Sens ï¼ˆå¤šä¸ªï¼‰å¯æ‰§è¡Œè¯­å¥ S
+# $ ç©ºä¸²
+# @a ä¼˜å…ˆçº§æ›´é«˜å­—ç¬¦ a
+# \string@attr è®°å½•è¯­ä¹‰åŠ¨ä½œ string å’Œè¾…åŠ©å€¼ attr 
 
 ####################
 
-# ×ÛºÏ
+# ç»¼åˆ
 
 P' -> Decs Pros
 Pros -> P Pros
@@ -26,14 +26,14 @@ Sens -> S
 
 #####################
 
-# ÉùÃ÷Óï¾ä
+# å£°æ˜è¯­å¥
 
 D -> Type ID ;      \declare
 
-## ÉùÃ÷º¯Êı
-P -> func ID ( Dlist ) MT { Decs }      \declare@func
-P -> func ID ( Dlist ) MT { Sens }      \declare@func
-P -> func ID ( Dlist ) MT { Decs Sens } \declare@func
+## å£°æ˜å‡½æ•°
+P -> func ID ( Dlist ) MT { Decs }      \declareFunc
+P -> func ID ( Dlist ) MT { Sens }      \declareFunc
+P -> func ID ( Dlist ) MT { Decs Sens } \declareFunc
 MT -> $     \mktable
 
 Dlist -> D , Dlist
@@ -46,7 +46,7 @@ Type -> float   \typedefine@4
 
 #####################
 
-# ¸³ÖµÓï¾ä
+# èµ‹å€¼è¯­å¥
 
 S -> ID = E ;   \assign
 S -> L = E ;    \assign
@@ -63,8 +63,8 @@ Const -> BOOL
 
 #####################
 
-# ¿ØÖÆÓï¾ä
-# B ²¼¶û±í´ïÊ½
+# æ§åˆ¶è¯­å¥
+# B å¸ƒå°”è¡¨è¾¾å¼
 
 S -> if B P             @else       \if
 S -> if B P else P                  \ifelse
@@ -85,7 +85,7 @@ B -> false
 
 #####################
 
-# ¹ı³Ìµ÷ÓÃ
+# è¿‡ç¨‹è°ƒç”¨
 
 S -> call ID ( Elist ) ;    \call
 Elist -> E , Elist      

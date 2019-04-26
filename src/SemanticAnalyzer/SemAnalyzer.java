@@ -14,7 +14,14 @@ import SyntacticAnalyzer.Production;
 public class SemAnalyzer {
     private static Stack<Attribute> semStack = new Stack<>();
     private int tempIndex =0;
+    private SymbolTable curTable;
     
+    /**
+     * 
+     */
+    public SemAnalyzer(SymbolTable symbolTable) {
+        curTable = symbolTable;
+    }
     
     
     public void addShift(Token token) {
@@ -23,8 +30,12 @@ public class SemAnalyzer {
             return;
         }
         if (token.classid==1) {
-            semStack.push(new Attribute("id","addr",""+token.getIntValue()));
-            // TODO 查添符号表
+            Attribute id = new Attribute("id");
+            id.putAttr("id", token.getID());
+            id.putAttr("classid", token.classid);
+            id.putAttr("line", token.line);
+            semStack.push(id);
+            // 规约时 查添符号表
             return;
         }
         switch (token.classid) {
@@ -50,21 +61,28 @@ public class SemAnalyzer {
     }
     
     public void addReduce(Production production) {
+        if (production.semAction==null) {
+            return;
+        }
         switch (production.semAction) {
             
             case "declare":
-                // 声明变量，函数
+                // 声明变量
                 
+                break;
+                
+            case "declareFunc":
+                // 声明函数
                 break;
                 
             case "typedefine":
                 // 类型定义
-                
+                typedefine(production);
                 break;
             
             case "assign":
                 // 赋值语句
-                
+                assign(production);
                 break;
                 
                 
@@ -119,6 +137,31 @@ public class SemAnalyzer {
         
     }
     
+    private void declare(Production production) {
+        semStack.pop(); // pop ';'
+        Attribute id = semStack.pop();
+        Attribute type = semStack.pop();
+        if (curTable.idStrings.contains(id.getAttr("id"))) {
+            // 重复声明
+            System.err.println("Error at Line["+id.getAttr("line")+"]: 重复声明 "+id.getAttr("id")+" .");
+            semStack.push(new Attribute("D"));
+            return;
+        }
+        curTable.addSymbol(id.getAttr("id"), id.getAttr("classid"), type.getAttr("type"), type.getAttr("width"));
+        semStack.push(new Attribute("D"));
+        // TODO 需要添加属性？
+    }
+    
+    private void typedefine(Production production) {
+        int width = Integer.valueOf(production.semAttr);
+        semStack.peek().putAttr("width", width);
+        semStack.peek().putAttr("type", semStack.peek().getAttr("name"));
+        semStack.peek().name = "Type";
+    }
+    
+    private void assign(Production production) {
+        
+    }
     
     private void expression(Production production) {
         Attribute tmp1 = semStack.pop();
@@ -129,8 +172,9 @@ public class SemAnalyzer {
         }
         if (production.semAttr.equals("const")) {
             Attribute tmp = new Attribute("E");
-            tmp.attrs.put("type", tmp1.name );
-            tmp.attrs.put("value", tmp1.attrs.get("value"));
+            tmp.putAttr("type", tmp1.name );
+            tmp.putAttr("addr", tmp1.getAttr("value"));
+            semStack.push(tmp);
             return;
         }
         Attribute tmp2 = semStack.pop();
@@ -139,20 +183,12 @@ public class SemAnalyzer {
             semStack.push(tmp2);
             return;
         }
-        String type = tmp1.attrs.get("type");
+        String type = tmp1.getAttr("type");
+        // TODO 类型检查
         
-       
-        switch (production.semAttr) {
-            case "+":
-                
-                break;
-                
-            case "*":
-                break;
-
-            default:
-                break;
-        }
+        Attribute tmp = new Attribute("E", "addr", newTemp());
+        Tuple.addTuple(new Tuple(production.semAttr, tmp3.getAttr("addr"), tmp1.getAttr("addr"), tmp.getAttr("addr")));
+        semStack.push(tmp);
         
     }
     

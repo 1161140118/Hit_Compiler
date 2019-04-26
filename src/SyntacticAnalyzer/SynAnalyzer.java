@@ -12,6 +12,7 @@ import java.util.Stack;
 import LexicalAnalyzer.LexAnalyzer;
 import LexicalAnalyzer.Token;
 import SemanticAnalyzer.SemAnalyzer;
+import SemanticAnalyzer.SymbolTable;
 import graphviz.DrawTree;
 
 /**
@@ -42,7 +43,7 @@ public class SynAnalyzer {
         initLexicalMessage();
         initStack();
         draw = new DrawTree(GrammarParser.terminals, GrammarParser.nonTerminals);
-        semAnalyzer = new SemAnalyzer();
+        semAnalyzer = new SemAnalyzer(new SymbolTable());
         processer();
         draw.draw();
     }
@@ -101,6 +102,7 @@ public class SynAnalyzer {
                     symbolStack.push(action.production.left);
                     System.out.println(curState + " : " + action.toString());
                     draw.addProduction(action.production);
+                    semAnalyzer.addReduce(action.production);
                     if (symbolStack.peek().equals(GrammarParser.startSymbol)) {
                         // 规约出开始符号
                         System.out.println("SynAnalysis Successfully Complete.");
@@ -158,7 +160,7 @@ public class SynAnalyzer {
     }
     
     private Token getCurToken() {
-        return tokens.get(tokenIndex);
+        return tokens.get(tokenIndex-1);
     }
 
     private int getLineNum() {
