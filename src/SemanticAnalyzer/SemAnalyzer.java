@@ -169,7 +169,7 @@ public class SemAnalyzer {
         semStack.pop(); // pop ';'
         Attribute id = semStack.pop();
         Attribute type = semStack.pop();
-        if (curTable.idStrings.contains(id.getAttr("id"))) {
+        if (curTable.Table.containsKey(id.getAttr("id"))) {
             // 重复声明
             System.err.println(
                     "Error at Line[" + id.getAttr("line") + "]: 重复声明变量 " + id.getAttr("id") + " .");
@@ -200,7 +200,7 @@ public class SemAnalyzer {
      */
     private void mktable() {
         Attribute id = semStack.get(semStack.size() - 1); // 取 id
-        if (curTable.idStrings.contains(id.getAttr("id"))) {
+        if (curTable.Table.containsKey(id.getAttr("id"))) {
             // 重复声明
             System.err.println(
                     "Error at Line[" + id.getAttr("line") + "]: 重复声明函数 " + id.getAttr("id") + " .");

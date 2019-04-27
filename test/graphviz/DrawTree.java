@@ -39,8 +39,7 @@ public class DrawTree {
     }
 
     public void addTerminals(String string) {
-        graph.addln(index + " [label=\"" + string + " (" + index + ")"
-                + "\" shape=none fontcolor = blue]");
+        graph.addln(index + " [label=\"" + string + "\" shape=none fontcolor = blue]");
         terminalIndexs.get(string).push(index);
         index++;
     }
@@ -55,7 +54,7 @@ public class DrawTree {
                 strings.add("-> " + terminalIndexs.get(string).pop());
             } else if (nonTerminalsIndexs.get(string).isEmpty()) {
                 strings.add(index + " [label=\"" + string + "\"]");
-//                strings.add(index + " [label=\"" + string + " (" + index + ")" + "\"]");
+                // strings.add(index + " [label=\"" + string + " (" + index + ")" + "\"]");
                 strings.add("-> " + index);
                 index++;
             } else {
@@ -65,13 +64,14 @@ public class DrawTree {
         // ¿Õ²úÉúÊ½
         if (production.right.size() == 0) {
             strings.add(index + " [label=\" $ " + "\" shape=none fontcolor = blue]");
-//            strings.add(index + " [label=\" $ (" + index + ")" + "\" shape=none fontcolor = blue]");
+            // strings.add(index + " [label=\" $ (" + index + ")" + "\" shape=none fontcolor =
+            // blue]");
             strings.add("-> " + index);
             index++;
         }
         // ²¹³ä lift ±àºÅ
-        strings.set(0, index + strings.get(0) + lift  + "\"]");
-//        strings.set(0, index + strings.get(0) + lift + " (" + index + ")" + "\"]");
+        strings.set(0, index + strings.get(0) + lift + "\"]");
+        // strings.set(0, index + strings.get(0) + lift + " (" + index + ")" + "\"]");
         for (int i = 1; i < strings.size(); i++) {
             if (strings.get(i).charAt(0) == '-') {
                 strings.set(i, index + strings.get(i));

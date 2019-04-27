@@ -33,7 +33,7 @@ public class LexAnalyzer {
      *  output/id
      *  output/token
      */
-    public LexAnalyzer(String input,String output) {
+    public LexAnalyzer(List<String> input,String output) {
         // 初始化 DFA
         wordDFA.init("src/LexicalAnalyzer/word.dfa");
         digitDFA.init("src/LexicalAnalyzer/digit.dfa");
@@ -41,7 +41,7 @@ public class LexAnalyzer {
         digitDFA.reset();
         Token.initTable("src/LexicalAnalyzer/sortcode");
         // 读文件
-        content = inputFromFile(input);
+        content = input;
         // 初始化当前行
         curline = content.get(rows);
         controller();
@@ -56,7 +56,7 @@ public class LexAnalyzer {
      *  output/token
      */
     public static void startLexicalAnalyzer(String input,String output) {
-        new LexAnalyzer(input, output);
+        new LexAnalyzer(inputFromFile(input), output);
     }
     
     // 主控

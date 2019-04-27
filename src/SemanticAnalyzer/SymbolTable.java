@@ -6,6 +6,7 @@ package SemanticAnalyzer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +20,7 @@ public class SymbolTable {
     private static List<SymbolTable> symbolTables = new LinkedList<>();
     private int OFFSET = 0;
     public final String proName;
-    public Map<String, Symbol> Table = new HashMap<>();
-    public Set<String> idStrings = new HashSet<>();
+    public Map<String, Symbol> Table = new LinkedHashMap<>();
     public SymbolTable pre;
 
     public SymbolTable(String proName) {

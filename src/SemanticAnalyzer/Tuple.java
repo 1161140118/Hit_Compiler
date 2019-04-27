@@ -52,9 +52,9 @@ public class Tuple {
     public void setResult(int result) {
         setResult(result + "");
     }
-    
-    public static void patchResult(int index,int result) {
-        if (index>=tupleList.size()) {
+
+    public static void patchResult(int index, int result) {
+        if (index >= tupleList.size()) {
             return;
         }
         tupleList.get(index).setResult(result);
@@ -62,7 +62,7 @@ public class Tuple {
 
     public static int addTuple(Tuple tuple) {
         if (tupleList.add(tuple)) {
-            System.err.println("    " + Address + " : " + tuple.toTuple4());
+            // System.err.println(" " + Address + " : " + tuple.toTuple4());
             Address++;
             return tupleList.size();
         }
@@ -70,28 +70,29 @@ public class Tuple {
     }
 
     public String toTuple3() {
-        if (op.charAt(0)=='j') {
-            if (op.length()==1) {
-                return "goto "+result;
-            }else {
-                return "if "+arg1+op.substring(1)+arg2+"  goto "+result;
+        if (op.charAt(0) == 'j') {
+            if (op.length() == 1) {
+                return "goto " + result;
+            } else {
+                return "if " + arg1 + op.substring(1) + arg2 + "  goto " + result;
             }
-        }else {
+        } else {
             if (arg2.equals("-")) {
-                return result+" = "+arg1;
+                return result + " = " + arg1;
             }
-            return result+" = "+arg1+op+arg2;
+            return result + " = " + arg1 + op + arg2;
         }
     }
 
     public String toTuple4() {
         return "( " + op + " , " + arg1 + " , " + arg2 + " , " + result + " )";
     }
-    
+
     public static void output() {
         System.out.println("  Tuples:");
-        for(int i=0;i<tupleList.size();i++) {
-            System.out.println("    "+i+" : "+tupleList.get(i).toTuple4()+"   "+tupleList.get(i).toTuple3());
+        for (int i = 0; i < tupleList.size(); i++) {
+            System.out.println("    " + i + " : " + tupleList.get(i).toTuple4() + "   "
+                    + tupleList.get(i).toTuple3());
         }
     }
 

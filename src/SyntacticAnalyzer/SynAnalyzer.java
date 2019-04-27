@@ -35,7 +35,19 @@ public class SynAnalyzer {
     private DrawTree draw;
     private SemAnalyzer semAnalyzer;
 
-    public SynAnalyzer() {}
+    public SynAnalyzer(List<String> codeInput) {
+        initTable("test/grammar/SemGrammar");
+        LRTable.output("test/result" + "/table");
+        new LexAnalyzer(codeInput, "test/result");
+        initLexicalMessage();
+        initStack();
+        draw = new DrawTree(GrammarParser.terminals, GrammarParser.nonTerminals);
+        semAnalyzer = new SemAnalyzer(new SymbolTable("Global"));
+        processer();
+        SymbolTable.output();
+        Tuple.output();
+        draw.draw();
+    }
 
     public SynAnalyzer(String sourceCode, String grammarPath, String lexicaloutput) {
         initTable(grammarPath);
