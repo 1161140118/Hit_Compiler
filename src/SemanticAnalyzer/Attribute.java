@@ -4,6 +4,7 @@
 package SemanticAnalyzer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,6 +14,10 @@ import java.util.Map;
 public class Attribute {
     public String name;
     private Map<String, String> attrs = new HashMap<>();
+    
+    public List<Integer> truelist;
+    public List<Integer> falselist;
+    public List<Integer> nextlist;
 
     public Attribute(String name) {
         super();
@@ -46,7 +51,5 @@ public class Attribute {
     public String toString() {
         return "Attribute [name=" + name + ", attrs=" + attrs.toString() + "]";
     }
-    
-    
 
 }

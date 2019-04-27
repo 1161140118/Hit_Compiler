@@ -20,8 +20,8 @@ P -> { Sens }       \process
 Decs -> D Decs
 Decs -> D
 Decs -> $
-Sens -> S Sens
-Sens -> S
+Sens -> Sens BM S   \sNextlist@3
+Sens -> S            \sNextlist@1
 
 
 #####################
@@ -52,8 +52,9 @@ S -> ID = E ;   \assign
 
 E -> E + E  @*  \expression@+
 E -> E * E      \expression@*
+E -> E - E      \expression@-
 E -> ( E )      \expression@combine
-E -> ID         \expression@ida
+E -> ID         \expression@id
 E -> Const      \expression@const
 
 Const -> INT
@@ -65,9 +66,12 @@ Const -> BOOL
 # 控制语句
 # B 布尔表达式
 
-S -> if B P             @else       \if
-S -> if B P else P                  \ifelse
-S -> while B P                      \while
+S -> if B then BM { Sens }             @else       \if
+S -> if B then BM { Sens } N else BM { Sens }      \ifelse
+N -> $                      \nextlist
+
+S -> while BM B do BM { Sens }                      \while
+
 B -> B || BM B     @! @&&  \bool@||
 B -> B && BM B     @!      \bool@&&
 BM -> $                 \boolmark

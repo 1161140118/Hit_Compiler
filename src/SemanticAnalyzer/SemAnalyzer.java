@@ -3,6 +3,8 @@
  */
 package SemanticAnalyzer;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
 import LexicalAnalyzer.Token;
 import SyntacticAnalyzer.Production;
@@ -35,6 +37,7 @@ public class SemAnalyzer {
             id.putAttr("id", token.getID());
             id.putAttr("classid", token.classid);
             id.putAttr("line", token.line);
+            id.putAttr("addr", token.getID());
             semStack.push(id);
             // 规约时 查添符号表
             return;
@@ -117,16 +120,24 @@ public class SemAnalyzer {
                 relation(production);
                 break;
 
+            case "nextlist":
+                nextlist();
+                break;
+
+            case "sNextlist":
+                sNextlist(production.semAttr);
+                break;
+
             case "if":
-                ifStatement(production);
+                ifStatement();
                 break;
 
             case "ifelse":
-                ifelseStatement(production);
+                ifelseStatement();
                 break;
 
             case "while":
-                whileStatement(production);
+                whileStatement();
                 break;
 
             case "call":
@@ -199,7 +210,6 @@ public class SemAnalyzer {
                 curTable.addSymbol(id.getAttr("id"), id.getAttr("classid"), "func", 1 + "");
         stableStack.push(idSymbol.mktable(curTable, id.getAttr("id")));
         curTable = stableStack.peek();
-
     }
 
     private void typedefine(Production production) {
@@ -218,36 +228,93 @@ public class SemAnalyzer {
     /**
      * 
      */
-    private void ifStatement(Production production) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * 
-     */
-    private void ifelseStatement(Production production) {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * 
-     */
-    private void whileStatement(Production production) {
-        Attribute p = semStack.pop();
+    private void ifStatement() {
+        /**
+         * S -> if B then BM { Sens }
+         */
+        semStack.pop(); // pop '}'
+        Attribute sens = semStack.pop();
+        semStack.pop(); // pop '{'
+        Attribute bm = semStack.pop();
+        semStack.pop(); // pop 'then'
         Attribute b = semStack.pop();
-        semStack.pop(); // pop 'while'
+        semStack.pop(); // pop 'if'
 
-
-
+        backpatch(b.truelist, bm.getIntAttr("quad"));
+        Attribute s = new Attribute("S");
+        s.nextlist = merge(b.falselist, sens.nextlist);
+        semStack.push(s);
     }
+
+    /**
+     * 
+     */
+    private void ifelseStatement() {
+        /**
+         * S -> if B then BM { Sens } N else BM { Sens }
+         */
+        semStack.pop(); // }
+        Attribute sens2 = semStack.pop();
+        semStack.pop(); // {
+        Attribute bm2 = semStack.pop();
+        semStack.pop(); // pop 'else'
+        Attribute n = semStack.pop();
+        semStack.pop(); // }
+        Attribute sens1 = semStack.pop();
+        semStack.pop(); // {
+        Attribute bm1 = semStack.pop();
+        semStack.pop(); // then
+        Attribute b = semStack.pop();
+        semStack.pop(); // pop 'if'
+
+        backpatch(b.truelist, bm1.getIntAttr("quad"));
+        backpatch(b.falselist, bm2.getIntAttr("quad"));
+
+        Attribute s = new Attribute("S");
+        s.nextlist = merge(sens1.nextlist, merge(n.nextlist, sens2.nextlist));
+        semStack.push(s);
+    }
+
+    /**
+     * 
+     */
+    private void whileStatement() {
+        /**
+         * S -> while BM B do BM { Sens }  
+         */
+        semStack.pop(); // '}'
+        Attribute sens = semStack.pop();
+        semStack.pop(); // '{'
+        Attribute bm2 = semStack.pop();
+        semStack.pop(); // pop 'do'
+        Attribute b = semStack.pop();
+        Attribute bm1 = semStack.pop();
+        semStack.pop(); // pop 'while'
+        backpatch(sens.nextlist, bm1.getIntAttr("quad"));
+        backpatch(b.truelist, bm2.getIntAttr("quad"));
+
+        Attribute s = new Attribute("S");
+        s.nextlist = b.falselist;
+        gencode("j", bm1.getIntAttr("quad"));
+        semStack.push(s);
+    }
+
+
+    /*************************
+     *      布尔表达式
+     *************************/
+
 
     private void boolvalue() {
         Attribute value = semStack.peek();
         value.name = "B";
-        value.putAttr("addr", newTemp());
-        Tuple.addTuple(new Tuple("=", value.getAttr("value"), "-", value.getAttr("addr")));
+        if (value.getAttr("value").equals("true")) {
+            value.truelist = makelist(nextquad());
+            gencode("j", -1);
+        } else {
+            value.falselist = makelist(nextquad());
+            gencode("j", -1);
+        }
     }
 
     /**
@@ -257,66 +324,77 @@ public class SemAnalyzer {
      * BM.falselist = B.falselist
      */
     private void boolmark() {
-        Attribute b = semStack.get(semStack.size() - 3);
         Attribute bm = new Attribute("BM");
-        bm.putAttr("quad", Tuple.Address);
-        bm.putAttr("turelist", b.getAttr("truelist"));
-        bm.putAttr("falselist", b.getAttr("falselist"));
+        bm.putAttr("quad", nextquad());
         semStack.push(bm);
     }
+
+    /**
+     * N -> $   \nextlist
+     */
+    private void nextlist() {
+        Attribute next = new Attribute("N");
+        next.nextlist = makelist(nextquad());
+        gencode("j", -1);
+        semStack.push(next);
+    }
+
+
 
     /**
      * bool :
      * 布尔运算
      */
     private void boolExp(Production production) {
-        Attribute b1 = semStack.pop();
+        /**
+         * b  b1 op bm b2
+         * B -> B || BM B     @! @&&  \bool@||
+         * B -> B && BM B     @!      \bool@&&
+         * B -> ! B                \bool@!
+         * B -> ( B ) 
+         */
         Attribute b2 = semStack.pop();
+        Attribute bm = semStack.pop();
 
         if (production.semAttr.equals("!")) {
             Attribute b = new Attribute("B");
-            b.putAttr("falselist", b1.getAttr("truelist"));
-            b.putAttr("truelist", b1.getAttr("falselist"));
+            b.truelist = b2.falselist;
+            b.falselist = b2.truelist;
             semStack.push(b);
             return;
         }
 
-        Attribute b3 = semStack.pop();
+        semStack.pop(); // pop op
         if (production.semAttr.equals("combine")) {
-            semStack.push(b2);
+            semStack.push(bm);
             return;
         }
 
-        Attribute b4 = semStack.pop();
+        Attribute b1 = semStack.pop();
         Attribute b = new Attribute("B");
         if (production.semAttr.equals("||")) {
             /**
-             * backpatch(M.falselist,M.quad)
-             * B.truelist = merge(M.truelist,B2.truelist)
+             * backpatch(B1.falselist,M.quad)
+             * B.truelist = merge(B1.truelist,B2.truelist)
              * B.falselist = B2.falselist
              */
             // backpatch
-            Tuple.tupleList.get(b2.getIntAttr("falselist")).setResult(b2.getAttr("quad"));
+            backpatch(b1.falselist, bm.getIntAttr("quad"));
             // merge
-            Tuple.tupleList.get(b2.getIntAttr("truelist")).setResult(b1.getAttr("truelist"));
-            b.putAttr("truelist", b1.getAttr("truelist"));
-
-            b.putAttr("falselist", b1.getAttr("truelist"));
+            b.truelist = merge(b1.truelist, b2.truelist);
+            b.falselist = copylist(b2.falselist);
         } else {
             /**
-             * bachpatch(M.truelist,M.quad)
+             * bachpatch(B1.truelist,M.quad)
              * B.truelist = B2.truelist
-             * B.falselist = merge(M.falselist,B2.falselist)
+             * B.falselist = merge(B1.falselist,B2.falselist)
              */
             // backpatch
-            Tuple.tupleList.get(b2.getIntAttr("truelist")).setResult(b2.getAttr("quad"));
-
-            b.putAttr("truelist", b1.getAttr("truelist"));
+            backpatch(b1.truelist, bm.getIntAttr("quad"));
+            b.truelist = copylist(b2.truelist);
             // merge
-            Tuple.tupleList.get(b2.getIntAttr("falselist")).setResult(b1.getAttr("falselist"));
-            b.putAttr("falselist", b1.getAttr("falselist"));
+            b.falselist = merge(b1.falselist, b2.falselist);
         }
-
     }
 
 
@@ -324,16 +402,15 @@ public class SemAnalyzer {
         Attribute exp1 = semStack.pop();
         Attribute relop = semStack.pop();
         Attribute exp2 = semStack.pop();
+        Attribute b = new Attribute("B");
+        b.truelist = makelist(nextquad());
+        b.falselist = makelist(nextquad() + 1);
+
         // j,e1,e2,addr
-        Tuple.addTuple(new Tuple("j" + relop.getAttr("op"), exp2.getAttr("addr"),
-                exp1.getAttr("addr"), Tuple.Address + 3));
-        // temp = false
-        Tuple.addTuple(new Tuple("=", "false", "-", newTemp()));
+        gencode("j" + relop.getAttr("op"), exp2.getAttr("addr"), exp1.getAttr("addr"), -1);
         // goto
-        Tuple.addTuple(new Tuple("j", "-", "-", Tuple.Address + 2));
-        // temp = true
-        Tuple.addTuple(new Tuple("=", "true", "-", newTemp()));
-        semStack.push(new Attribute("B", "addr", "" + (Tuple.Address - 4)));
+        gencode("j", -1);
+        semStack.push(b);
     }
 
     private void relop(Production production) {
@@ -357,11 +434,37 @@ public class SemAnalyzer {
                     "Error at Line[" + id.getAttr("line") + "]: 变量未声明 " + id.getAttr("id") + " .");
         }
         semStack.push(new Attribute("S"));
-        Tuple.addTuple(new Tuple("=", E.getAttr("addr"), "-", id.getAttr("id")));
+        gencode("=", E.getAttr("addr"), "-", id.getAttr("id"));
+        // 记录 nextlist
+        semStack.peek().nextlist = makelist(nextquad());
+    }
+
+
+    private void sNextlist(String attr) {
+        Attribute s = semStack.pop();
+
+        if (attr.equals("1")) {
+            s.name = "Sens";
+            semStack.push(s);
+            return;
+        }
+
+        Attribute bm = semStack.pop();
+        Attribute sens = semStack.pop();
+        Attribute Sens = new Attribute("Sens");
+
+        // backpatch
+        backpatch(sens.nextlist, bm.getIntAttr("quad"));
+        Sens.nextlist = s.nextlist;
+        semStack.push(Sens);
     }
 
     private void expression(Production production) {
         Attribute tmp1 = semStack.pop();
+
+        /**
+         * E -> ID
+         */
         if (production.semAttr.equals("id")) {
             tmp1.name = "E";
             semStack.push(tmp1);
@@ -372,6 +475,10 @@ public class SemAnalyzer {
             }
             return;
         }
+
+        /**
+         * E -> Const
+         */
         if (production.semAttr.equals("const")) {
             Attribute tmp = new Attribute("E");
             tmp.putAttr("type", tmp1.name);
@@ -382,18 +489,77 @@ public class SemAnalyzer {
         }
         Attribute tmp2 = semStack.pop();
         Attribute tmp3 = semStack.pop();
+
+        /**
+         * E -> ( E )
+         */
         if (production.semAttr.equals("combine")) {
             semStack.push(tmp2);
             return;
         }
+
         String type = tmp1.getAttr("type");
         // TODO 类型检查
 
+
+        /**
+         * E -> E op E 
+         */
+
         Attribute tmp = new Attribute("E", "addr", newTemp());
-        Tuple.addTuple(new Tuple(production.semAttr, tmp3.getAttr("addr"), tmp1.getAttr("addr"),
-                tmp.getAttr("addr")));
+        gencode(production.semAttr, tmp3.getAttr("addr"), tmp1.getAttr("addr"),
+                tmp.getAttr("addr"));
         semStack.push(tmp);
 
+    }
+
+    /*******************************
+     *      辅助方法
+     *******************************/
+
+    private void gencode(String op, String arg1, String arg2, String result) {
+        Tuple.addTuple(new Tuple(op, arg1, arg2, result));
+    }
+
+    private void gencode(String op, String arg1, String arg2, int result) {
+        Tuple.addTuple(new Tuple(op, arg1, arg2, result));
+    }
+
+    private void gencode(String op, int result) {
+        Tuple.addTuple(new Tuple(op, result));
+    }
+
+    private List<Integer> copylist(List<Integer> list) {
+        List<Integer> newlist = new LinkedList<>();
+        newlist.addAll(list);
+        return newlist;
+    }
+
+    private List<Integer> makelist(int quad) {
+        List<Integer> newlist = new LinkedList<>();
+        newlist.add(quad);
+        return newlist;
+    }
+
+    private List<Integer> merge(List<Integer> list1, List<Integer> list2) {
+        List<Integer> newlist = new LinkedList<>();
+        newlist.addAll(list1);
+        newlist.addAll(list2);
+        return newlist;
+    }
+
+    private void backpatch(List<Integer> list, int quad) {
+        for (Integer integer : list) {
+            Tuple.patchResult(integer, quad);
+        }
+    }
+
+    /**
+     * 获得下一个四元组地址
+     * @return
+     */
+    private int nextquad() {
+        return Tuple.Address;
     }
 
     private String newTemp() {

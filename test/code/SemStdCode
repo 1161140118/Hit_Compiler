@@ -1,14 +1,23 @@
+int a;
 int b;
 
-func f1 (){
-    char next;
+func f1(){
+    char c;
 }
-
+    
 func main(){
-    int a;
- 
-    a = 1*3+2;
+    int c;
+    int d;
+    int x;
+    int y;
+    
+    while (a<b) do {
+        if (c<d) then {
+            x = y + z;
 
-
+        } else {
+            x = y - z;
+        }
+    }
 }
 

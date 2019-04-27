@@ -13,6 +13,7 @@ import LexicalAnalyzer.LexAnalyzer;
 import LexicalAnalyzer.Token;
 import SemanticAnalyzer.SemAnalyzer;
 import SemanticAnalyzer.SymbolTable;
+import SemanticAnalyzer.Tuple;
 import graphviz.DrawTree;
 
 /**
@@ -46,6 +47,7 @@ public class SynAnalyzer {
         semAnalyzer = new SemAnalyzer(new SymbolTable("Global"));
         processer();
         SymbolTable.output();
+        Tuple.output();
         draw.draw();
         
     }
