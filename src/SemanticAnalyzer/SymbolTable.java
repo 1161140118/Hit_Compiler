@@ -4,9 +4,11 @@
 package SemanticAnalyzer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,7 +19,7 @@ public class SymbolTable {
     private static List<SymbolTable> symbolTables = new LinkedList<>();
     private int OFFSET = 0;
     public final String proName;
-    public List<Symbol> Table = new ArrayList<>();
+    public Map<String, Symbol> Table = new HashMap<>();
     public Set<String> idStrings = new HashSet<>();
     public SymbolTable pre;
 
@@ -28,15 +30,13 @@ public class SymbolTable {
 
     public Symbol addSymbol(String name, String classId, String type, String offset) {
         Symbol newsymbol = new Symbol(name, classId, type, OFFSET);
-        Table.add(newsymbol);
-        idStrings.add(name);
+        Table.put(name,newsymbol);
         OFFSET += Integer.valueOf(offset);
-//        System.err.println("New Symbol" + newsymbol.toString());
         return newsymbol;
     }
 
     public boolean hasDefine(String string) {
-        if (idStrings.contains(string)) {
+        if (Table.containsKey(string)) {
             return true;
         }
         if (pre == null) {
@@ -45,10 +45,17 @@ public class SymbolTable {
         return pre.hasDefine(string);
     }
     
+    public String getType(String id) {
+        if (!hasDefine(id)) {
+            return null;
+        }
+        return Table.get(id).type;
+    }
+    
     public static void output() {
         for (SymbolTable symbolTable : symbolTables) {
             System.out.println("  Table:"+symbolTable.proName);
-            for (Symbol symbol : symbolTable.Table) {
+            for (Symbol symbol : symbolTable.Table.values()) {
                 System.out.println("    "+symbol.toString());
             }
         }

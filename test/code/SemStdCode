@@ -10,12 +10,15 @@ func main(){
     int d;
     int x;
     int y;
+    /* error redeclare */
+    int c;
     
     while (a<b) do {
         if (c<d) then {
+            /* error undeclared */
             x = y + z;
-
         } else {
+            /* error undeclared */
             x = y - z;
         }
     }

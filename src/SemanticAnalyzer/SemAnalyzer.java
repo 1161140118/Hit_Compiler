@@ -241,6 +241,7 @@ public class SemAnalyzer {
         semStack.pop(); // pop 'if'
 
         backpatch(b.truelist, bm.getIntAttr("quad"));
+        backpatch(b.falselist, nextquad());
         Attribute s = new Attribute("S");
         s.nextlist = merge(b.falselist, sens.nextlist);
         semStack.push(s);
@@ -297,6 +298,7 @@ public class SemAnalyzer {
         s.nextlist = b.falselist;
         gencode("j", bm1.getIntAttr("quad"));
         semStack.push(s);
+        backpatch(b.falselist, nextquad());
     }
 
 
@@ -484,7 +486,6 @@ public class SemAnalyzer {
             tmp.putAttr("type", tmp1.name);
             tmp.putAttr("addr", tmp1.getAttr("value"));
             semStack.push(tmp);
-            // System.err.println("Const : "+tmp.toString());
             return;
         }
         Attribute tmp2 = semStack.pop();
@@ -498,9 +499,15 @@ public class SemAnalyzer {
             return;
         }
 
-        String type = tmp1.getAttr("type");
-        // TODO 类型检查
-
+        // TODO 类型检查x
+//        String type1 = tmp1.getAttr("type");
+//        String type3 = tmp3.getAttr("type");
+//        
+//        if (!type1.equals(type3)) {
+//            System.err.println("Error at Line[" + tmp1.getAttr("line") + "]: 变量未声明 "
+//                    + tmp1.getAttr("id") + " .");            
+//        }
+        
 
         /**
          * E -> E op E 
@@ -553,6 +560,7 @@ public class SemAnalyzer {
             Tuple.patchResult(integer, quad);
         }
     }
+    
 
     /**
      * 获得下一个四元组地址

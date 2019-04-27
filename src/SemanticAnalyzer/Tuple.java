@@ -72,9 +72,6 @@ public class Tuple {
     public String toTuple3() {
         if (op.charAt(0)=='j') {
             if (op.length()==1) {
-                if (result.equals("-1")) {
-                    return "goto "+Address;
-                }
                 return "goto "+result;
             }else {
                 return "if "+arg1+op.substring(1)+arg2+"  goto "+result;
@@ -88,9 +85,6 @@ public class Tuple {
     }
 
     public String toTuple4() {
-        if (result.equals("-1")) {
-            return "( " + op + " , " + arg1 + " , " + arg2 + " , " + Address + " )";
-        }
         return "( " + op + " , " + arg1 + " , " + arg2 + " , " + result + " )";
     }
     
