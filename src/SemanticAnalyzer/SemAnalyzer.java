@@ -18,13 +18,12 @@ import SyntacticAnalyzer.Production;
  *
  */
 public class SemAnalyzer {
-//    private int next = 10;
     private static String quad = "quad";
     private static Stack<Attribute> semStack = new Stack<>();
     private static Stack<SymbolTable> stableStack = new Stack<>();
     private int tempIndex = 0;
     private SymbolTable curTable;
-    private Map<String, Integer> funcNext = new HashMap<>();
+
 
     /**
      * 
@@ -200,10 +199,8 @@ public class SemAnalyzer {
         }
         Attribute id = semStack.pop();
         semStack.pop(); // pop 'func'
-        funcNext.put(id.getAttr("id"), nextquad());
-        gencode("j", -1);      
-
-
+//        funcNext.put(id.getAttr("id"), nextquad());
+//        gencode("j", -1);      
         
         
         semStack.push(new Attribute(production.left));
@@ -335,14 +332,15 @@ public class SemAnalyzer {
         s.nextlist = new LinkedList<>();
         semStack.push(s);
 
-        int addr = curTable.getFuncSymbol(id.getAttr("id")).addr;        
-        gencode("j", addr);
-        
-        int tupleid = funcNext.get(id.getAttr("id"));
-        backpatch(new LinkedList<>(Arrays.asList(tupleid)), nextquad());
-
-
-
+        SymbolTable funcTable = SymbolTable.symbolTables.get(id.getAttr("id"));
+        int offsetAdd = funcTable.Address;
+        for (Tuple tuple : funcTable.tupleList) {
+            if (tuple.op.startsWith("j")) {
+                // Ìø×ª£¬ÐÞ¸ÄÆ«ÒÆ
+                tuple.resultOffset(offsetAdd);
+            }
+            curTable.addTuple(tuple);
+        }
     }
 
 
@@ -586,15 +584,15 @@ public class SemAnalyzer {
      *******************************/
 
     private void gencode(String op, String arg1, String arg2, String result) {
-        Tuple.addTuple(new Tuple(op, arg1, arg2, result));
+        curTable.addTuple(new Tuple(op, arg1, arg2, result));
     }
 
     private void gencode(String op, String arg1, String arg2, int result) {
-        Tuple.addTuple(new Tuple(op, arg1, arg2, result));
+        curTable.addTuple(new Tuple(op, arg1, arg2, result));
     }
 
     private void gencode(String op, int result) {
-        Tuple.addTuple(new Tuple(op, result));
+        curTable.addTuple(new Tuple(op, result));
     }
 
     private List<Integer> copylist(List<Integer> list) {
@@ -618,7 +616,7 @@ public class SemAnalyzer {
 
     private void backpatch(List<Integer> list, int quad) {
         for (Integer integer : list) {
-            Tuple.patchResult(integer, quad);
+            curTable.patchResult(integer, quad);
         }
     }
 
@@ -632,7 +630,7 @@ public class SemAnalyzer {
      * @return
      */
     private int nextquad() {
-        return Tuple.Address;
+        return curTable.Address;
     }
 
     private String newTemp() {

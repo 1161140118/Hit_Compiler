@@ -2,7 +2,6 @@ int a;
 int b;
 
 func f1(){
-    int c;
     c= 1;
     a = b + c;
 }
@@ -10,6 +9,8 @@ func f1(){
 func main(){
     int c;
     int d;
+    int y;
+    float z;
     a = 1;
     b = 2;
    
@@ -20,6 +21,5 @@ func main(){
             call f1();
         }
     }
-    
 }
 

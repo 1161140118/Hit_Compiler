@@ -13,11 +13,11 @@ import com.sun.security.ntlm.Client;
  *
  */
 public class Tuple {
-    public static List<Tuple> tupleList = new LinkedList<>();
+//    public static List<Tuple> tupleList = new LinkedList<>();
     // 下一个 元组表达式的地址
     public static int Address = 0;
 
-    private String op;
+    public final String op;
     private String arg1;
     private String arg2;
     private String result;
@@ -53,22 +53,26 @@ public class Tuple {
     public void setResult(int result) {
         setResult(result + "");
     }
-
-    public static void patchResult(int index, int result) {
-        if (index >= tupleList.size()) {
-            return;
-        }
-        tupleList.get(index).setResult(result);
+    
+    public void resultOffset(int offset) {
+        setResult(Integer.valueOf(result) + offset);
     }
 
-    public static int addTuple(Tuple tuple) {
-        if (tupleList.add(tuple)) {
-            // System.err.println(" " + Address + " : " + tuple.toTuple4());
-            Address++;
-            return tupleList.size();
-        }
-        return -1;
-    }
+//    public static void patchResult(int index, int result) {
+//        if (index >= tupleList.size()) {
+//            return;
+//        }
+//        tupleList.get(index).setResult(result);
+//    }
+//
+//    public static int addTuple(Tuple tuple) {
+//        if (tupleList.add(tuple)) {
+//            // System.err.println(" " + Address + " : " + tuple.toTuple4());
+//            Address++;
+//            return tupleList.size();
+//        }
+//        return -1;
+//    }
 
     public String toTuple3() {
         if (op.charAt(0) == 'j') {
@@ -92,7 +96,7 @@ public class Tuple {
     public static void output() {
         int i=0;
         System.out.println("  Tuples:");
-        for (Tuple tuple : tupleList) {
+        for (Tuple tuple : SymbolTable.symbolTables.get("main").tupleList) {
             System.out.println("    " + i + " : " + tuple.toTuple4()+ "   "
                     + tuple.toTuple3());
             gui.Client.addTuple(i, tuple);

@@ -18,18 +18,18 @@ import javafx.scene.control.Tab;
  *
  */
 public class SymbolTable {
-    private static List<SymbolTable> symbolTables = new LinkedList<>();
+    public static Map<String, SymbolTable> symbolTables = new LinkedHashMap<>();
     private int OFFSET = 0;
     public final String proName;
     public Map<String, Symbol> Table = new LinkedHashMap<>();
     public SymbolTable pre;
     
-    public List<Tuple> tuples = new LinkedList<>();
+    public List<Tuple> tupleList = new LinkedList<>();
     public int Address;
 
     public SymbolTable(String proName) {
         this.proName = proName;
-        symbolTables.add(this);
+        symbolTables.put(proName,this);
     }
 
     public Symbol addSymbol(String name, String classId, String type, String offset) {
@@ -37,6 +37,22 @@ public class SymbolTable {
         Table.put(name,newsymbol);
         OFFSET += Integer.valueOf(offset);
         return newsymbol;
+    }
+    
+    public int addTuple(Tuple tuple) {
+        if (tupleList.add(tuple)) {
+            // System.err.println(" " + Address + " : " + tuple.toTuple4());
+            Address++;
+            return tupleList.size();
+        }
+        return -1;
+    }
+    
+    public void patchResult(int index, int result) {
+        if (index >= tupleList.size()) {
+            return;
+        }
+        tupleList.get(index).setResult(result);
     }
 
     public boolean hasDefine(String string) {
@@ -63,11 +79,11 @@ public class SymbolTable {
     }
     
     public Symbol getFuncSymbol(String id) {
-        return symbolTables.get(0).Table.get(id);
+        return symbolTables.get("Global").Table.get(id);
     }
     
     public static void output() {
-        for (SymbolTable symbolTable : symbolTables) {
+        for (SymbolTable symbolTable : symbolTables.values()) {
             System.out.println("  Table:"+symbolTable.proName);
             for (Symbol symbol : symbolTable.Table.values()) {
                 System.out.println("    "+symbol.toString());
