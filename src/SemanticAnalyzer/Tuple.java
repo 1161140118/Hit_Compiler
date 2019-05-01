@@ -5,6 +5,7 @@ package SemanticAnalyzer;
 
 import java.util.LinkedList;
 import java.util.List;
+import com.sun.security.ntlm.Client;
 
 /**
  * @author standingby
@@ -89,11 +90,22 @@ public class Tuple {
     }
 
     public static void output() {
+        int i=0;
         System.out.println("  Tuples:");
-        for (int i = 0; i < tupleList.size(); i++) {
-            System.out.println("    " + i + " : " + tupleList.get(i).toTuple4() + "   "
-                    + tupleList.get(i).toTuple3());
+        for (Tuple tuple : tupleList) {
+            System.out.println("    " + i + " : " + tuple.toTuple4()+ "   "
+                    + tuple.toTuple3());
+            gui.Client.addTuple(i, tuple);
+            i++;            
         }
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return toTuple4();
     }
 
 }

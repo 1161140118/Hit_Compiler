@@ -9,12 +9,10 @@ func f1(){
     
 func main(){
     int c;
-    int x;
-    int y;
-    float z;
-    /* error redeclare */
-    int c;
-    
+    int d;
+    a = 1;
+    b = 2;
+   
     while (a<b) do {
         if (c<d) then {
             x = y + z;

@@ -11,7 +11,7 @@ import LexicalAnalyzer.LexAnalyzer;
 public class LexAnalyzerTest {
     
     public static void main(String[] args) {
-        new LexAnalyzer("test/code/source", "test/result");
+        LexAnalyzer.startLexicalAnalyzer("test/code/source", "test/result");
         
     }
 

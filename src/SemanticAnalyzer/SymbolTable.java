@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javafx.scene.control.Tab;
 
 /**
  * @author standingby
@@ -22,6 +23,9 @@ public class SymbolTable {
     public final String proName;
     public Map<String, Symbol> Table = new LinkedHashMap<>();
     public SymbolTable pre;
+    
+    public List<Tuple> tuples = new LinkedList<>();
+    public int Address;
 
     public SymbolTable(String proName) {
         this.proName = proName;
@@ -49,7 +53,17 @@ public class SymbolTable {
         if (!hasDefine(id)) {
             return null;
         }
-        return Table.get(id).type;
+        if (Table.containsKey(id)) {
+            return Table.get(id).type;
+        }
+        if (pre == null) {
+            return null;
+        }
+        return pre.Table.get(id).type;
+    }
+    
+    public Symbol getFuncSymbol(String id) {
+        return symbolTables.get(0).Table.get(id);
     }
     
     public static void output() {
@@ -71,7 +85,8 @@ class Symbol {
     String type;
     // String value;
     int offset;
-
+    int addr;
+    
     public SymbolTable next;
 
 

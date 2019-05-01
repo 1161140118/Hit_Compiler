@@ -11,7 +11,7 @@ import SyntacticAnalyzer.SynAnalyzer;
 public class SemAnalyzerTest {
     
     public static void main(String[] args) {
-        new SynAnalyzer("test/code/SemStdCode","test/grammar/SemGrammar","test/result");
+        new SynAnalyzer("test/code/SemTestCode","test/grammar/SemGrammar","test/result");
     }
     
     

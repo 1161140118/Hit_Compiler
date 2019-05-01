@@ -20,7 +20,8 @@ P -> { Sens }       \process
 Decs -> D Decs
 Decs -> D
 Decs -> $
-Sens -> Sens BM S   \sNextlist@3
+#Sens -> Sens ; BM S   \sNextlist@3
+Sens -> S Sens       \sNextlist@3
 Sens -> S            \sNextlist@1
 
 

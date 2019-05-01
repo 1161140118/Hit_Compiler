@@ -48,8 +48,8 @@ public class LRTable {
         for (String string : strings) {
             if (table.containsKey(src)) {
                 if (table.get(src).containsKey(string)) {
-                    System.err.println("Reduce conflict : " + src + " , " + string);
-                    System.err.println(table.get(src).get(string) + "  <==  " + action);
+//                    System.err.println("Reduce conflict : " + src + " , " + string);
+//                    System.err.println(table.get(src).get(string) + "  <==  " + action);
                 }
             }
             map.put(string, action);

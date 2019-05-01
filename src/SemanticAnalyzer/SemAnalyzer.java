@@ -3,9 +3,13 @@
  */
 package SemanticAnalyzer;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
+import com.sun.security.ntlm.Client;
 import LexicalAnalyzer.Token;
 import SyntacticAnalyzer.Production;
 
@@ -14,10 +18,13 @@ import SyntacticAnalyzer.Production;
  *
  */
 public class SemAnalyzer {
+//    private int next = 10;
+    private static String quad = "quad";
     private static Stack<Attribute> semStack = new Stack<>();
     private static Stack<SymbolTable> stableStack = new Stack<>();
     private int tempIndex = 0;
     private SymbolTable curTable;
+    private Map<String, Integer> funcNext = new HashMap<>();
 
     /**
      * 
@@ -142,7 +149,7 @@ public class SemAnalyzer {
 
             case "call":
                 // 函数调用
-
+                call();
                 break;
 
             case "mktable":
@@ -173,6 +180,7 @@ public class SemAnalyzer {
             // 重复声明
             System.err.println(
                     "Error at Line[" + id.getAttr("line") + "]: 重复声明变量 " + id.getAttr("id") + " .");
+            addError(id.getIntAttr("line"), "重复声明变量 " + id.getAttr("id") + " .");
             semStack.push(new Attribute("D"));
             return;
         }
@@ -187,9 +195,17 @@ public class SemAnalyzer {
      * @param production
      */
     private void declareFunc(Production production) {
-        while (!semStack.pop().name.equals("func")) {
-            // 弹出栈
+        while (!semStack.pop().name.equals("MT")) {
+            // 弹出栈，余ID
         }
+        Attribute id = semStack.pop();
+        semStack.pop(); // pop 'func'
+        funcNext.put(id.getAttr("id"), nextquad());
+        gencode("j", -1);      
+
+
+        
+        
         semStack.push(new Attribute(production.left));
         stableStack.pop();
         curTable = stableStack.peek();
@@ -204,10 +220,12 @@ public class SemAnalyzer {
             // 重复声明
             System.err.println(
                     "Error at Line[" + id.getAttr("line") + "]: 重复声明函数 " + id.getAttr("id") + " .");
+            addError(id.getIntAttr("line"), "重复声明函数 " + id.getAttr("id") + " .");
         }
         semStack.push(new Attribute("MT"));
         Symbol idSymbol =
                 curTable.addSymbol(id.getAttr("id"), id.getAttr("classid"), "func", 1 + "");
+        idSymbol.addr = nextquad();
         stableStack.push(idSymbol.mktable(curTable, id.getAttr("id")));
         curTable = stableStack.peek();
     }
@@ -244,6 +262,8 @@ public class SemAnalyzer {
         backpatch(b.falselist, nextquad());
         Attribute s = new Attribute("S");
         s.nextlist = merge(b.falselist, sens.nextlist);
+        // 记录if开始位置
+        s.putAttr(quad, bm.getIntAttr("quad"));
         semStack.push(s);
     }
 
@@ -271,8 +291,10 @@ public class SemAnalyzer {
         backpatch(b.truelist, bm1.getIntAttr("quad"));
         backpatch(b.falselist, bm2.getIntAttr("quad"));
 
+
         Attribute s = new Attribute("S");
         s.nextlist = merge(sens1.nextlist, merge(n.nextlist, sens2.nextlist));
+        s.putAttr(quad, bm1.getIntAttr(quad));
         semStack.push(s);
     }
 
@@ -298,7 +320,29 @@ public class SemAnalyzer {
         s.nextlist = b.falselist;
         gencode("j", bm1.getIntAttr("quad"));
         semStack.push(s);
-        backpatch(b.falselist, nextquad());
+        backpatch(b.falselist, nextquad() );
+        semStack.peek().putAttr("quad", nextquad());
+    }
+
+    private void call() {
+        while (!semStack.get(semStack.size() - 2).name.equals("call")) {
+            semStack.pop();
+        }
+        Attribute id = semStack.pop();
+
+        semStack.pop(); // pop 'call'
+        Attribute s = new Attribute("S");
+        s.nextlist = new LinkedList<>();
+        semStack.push(s);
+
+        int addr = curTable.getFuncSymbol(id.getAttr("id")).addr;        
+        gencode("j", addr);
+        
+        int tupleid = funcNext.get(id.getAttr("id"));
+        backpatch(new LinkedList<>(Arrays.asList(tupleid)), nextquad());
+
+
+
     }
 
 
@@ -408,6 +452,7 @@ public class SemAnalyzer {
         b.truelist = makelist(nextquad());
         b.falselist = makelist(nextquad() + 1);
 
+
         // j,e1,e2,addr
         gencode("j" + relop.getAttr("op"), exp2.getAttr("addr"), exp1.getAttr("addr"), -1);
         // goto
@@ -434,30 +479,33 @@ public class SemAnalyzer {
         if (!curTable.hasDefine(id.getAttr("id"))) {
             System.err.println(
                     "Error at Line[" + id.getAttr("line") + "]: 变量未声明 " + id.getAttr("id") + " .");
+            addError(id.getIntAttr("line"), "变量未声明 " + id.getAttr("id") + " .");
         }
         semStack.push(new Attribute("S"));
         gencode("=", E.getAttr("addr"), "-", id.getAttr("id"));
         // 记录 nextlist
         semStack.peek().nextlist = makelist(nextquad());
+        semStack.peek().putAttr("quad", nextquad());
     }
 
 
     private void sNextlist(String attr) {
-        Attribute s = semStack.pop();
+        Attribute sens = semStack.pop();
 
         if (attr.equals("1")) {
-            s.name = "Sens";
-            semStack.push(s);
+            // Sens -> S
+            sens.name = "Sens";
+            semStack.push(sens);
             return;
         }
 
-        Attribute bm = semStack.pop();
-        Attribute sens = semStack.pop();
+//        Attribute bm = semStack.pop();
+        Attribute s = semStack.pop();
         Attribute Sens = new Attribute("Sens");
 
         // backpatch
-        backpatch(sens.nextlist, bm.getIntAttr("quad"));
-        Sens.nextlist = s.nextlist;
+        Sens.nextlist = sens.nextlist;
+        backpatch(Sens.nextlist, nextquad());
         semStack.push(Sens);
     }
 
@@ -474,6 +522,7 @@ public class SemAnalyzer {
             if (!curTable.hasDefine(tmp1.getAttr("id"))) {
                 System.err.println("Error at Line[" + tmp1.getAttr("line") + "]: 变量未声明 "
                         + tmp1.getAttr("id") + " .");
+                addError(tmp1.getIntAttr("line"), "变量未声明 " + tmp1.getAttr("id") + " .");
             }
             return;
         }
@@ -499,15 +548,27 @@ public class SemAnalyzer {
             return;
         }
 
-        // TODO 类型检查x
-//        String type1 = tmp1.getAttr("type");
-//        String type3 = tmp3.getAttr("type");
-//        
-//        if (!type1.equals(type3)) {
-//            System.err.println("Error at Line[" + tmp1.getAttr("line") + "]: 变量未声明 "
-//                    + tmp1.getAttr("id") + " .");            
-//        }
-        
+        // 类型检查
+        String type1 = curTable.getType(tmp1.getAttr("id"));
+        String type3 = curTable.getType(tmp3.getAttr("id"));
+        System.err.println(type1+","+type3);
+        if (!(type1 == null) && !(type3 == null) && !(type1.equals(type3))) {
+            // 均定义类型且类型不一致
+            System.err.println("Error at Line[" + tmp1.getAttr("line") + "]: 类型不一致 "
+                    + tmp1.getAttr("id") + " .");
+            addError(tmp1.getIntAttr("line"), "类型不一致 " + tmp1.getAttr("id") + " .");
+            // 强制类型转换
+            if (type1.equals("int")) {
+                if (type3.equals("float")) {
+                    tmp1.putAttr("type", "float");
+                }
+            } else if (type1.equals("float")) {
+                if (type3.equals("int")) {
+                    tmp3.putAttr("type", "float");
+                }
+            }
+        }
+
 
         /**
          * E -> E op E 
@@ -560,7 +621,11 @@ public class SemAnalyzer {
             Tuple.patchResult(integer, quad);
         }
     }
-    
+
+    private void addError(int i, String string) {
+        gui.Client.addAlert(i, string);
+    }
+
 
     /**
      * 获得下一个四元组地址
