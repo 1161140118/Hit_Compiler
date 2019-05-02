@@ -97,11 +97,8 @@ public class SymbolTable {
 class Symbol {
     String name;
     String classId;
-
     String type;
-    // String value;
     int offset;
-    int addr;
     
     public SymbolTable next;
 

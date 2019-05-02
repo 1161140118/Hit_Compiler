@@ -13,9 +13,6 @@ import com.sun.security.ntlm.Client;
  *
  */
 public class Tuple {
-//    public static List<Tuple> tupleList = new LinkedList<>();
-    // 下一个 元组表达式的地址
-    public static int Address = 0;
 
     public final String op;
     private String arg1;

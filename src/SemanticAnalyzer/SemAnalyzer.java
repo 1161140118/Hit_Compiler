@@ -222,7 +222,6 @@ public class SemAnalyzer {
         semStack.push(new Attribute("MT"));
         Symbol idSymbol =
                 curTable.addSymbol(id.getAttr("id"), id.getAttr("classid"), "func", 1 + "");
-        idSymbol.addr = nextquad();
         stableStack.push(idSymbol.mktable(curTable, id.getAttr("id")));
         curTable = stableStack.peek();
     }
